@@ -902,6 +902,8 @@ drawbar(Monitor *m)
 					scm = SchemeNorm;
 				drw_setscheme(drw, scheme[scm]);
 				drw_text(drw, x, 0, (1.0 / (double)n) * w, bh, lrpad / 2, c->name, 0);
+				drw_setscheme(drw, scheme[SchemeSel]); 
+				if (c->isfloating) { drw_rect(drw, x, 0, 3, 3, 1, 0); }
 				x += (1.0 / (double)n) * w;
 			}
 		} else {
