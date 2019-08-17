@@ -1251,6 +1251,13 @@ keypress(XEvent *e)
 void
 killclient(const Arg *arg)
 {
+	Monitor *m;
+	int n;
+	for (n = 0, m = mons; m; m = m->next, n++) {
+		focus(m->sel);
+		restack(m);
+	}
+
 	if (!selmon->sel)
 		return;
 	if (!sendevent(selmon->sel, wmatom[WMDelete])) {
