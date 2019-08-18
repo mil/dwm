@@ -35,7 +35,7 @@ static const char *colors[][3]      = {
 	[SchemeHid]  = { col_gray4, col_cyan,  col_gray2 },
 };
 static const int focusonwheel       = 0;
-static const unsigned int gappx     = 3;        /* gap pixel between windows */
+static const unsigned int gappx     = 5;        /* gap pixel between windows */
  
 
 /* tagging */
@@ -58,6 +58,7 @@ static const int nmaster     = 1;    /* number of clients in master area */
 static const int resizehints = 0;    /* 1 means respect size hints in tiled resizals */
 
 #include "layouts.c"
+#include "unfloat.c"
 static const Layout layouts[] = {
 	/* symbol     arrange function */
 	{ "[=]",      tile },    /* first entry is default */
@@ -65,6 +66,8 @@ static const Layout layouts[] = {
 	{ "[M]",      monocle },
 	{ "[D]",      deck },
 	{ "[G]",      grid },
+	{ "|M|",      centeredmaster },
+	{  "☀",       centeredfloatingmaster }
 };
 
 /* key definitions */
@@ -113,8 +116,12 @@ static Key keys[] = {
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
 	{ MODKEY,                       XK_r,      setlayout,      {.v = &layouts[3]} },
 	{ MODKEY,                       XK_g,      setlayout,      {.v = &layouts[4]} },
+	{ MODKEY,                       XK_e,      setlayout,      {.v = &layouts[5]} },
+	{ MODKEY|ShiftMask,             XK_e,      setlayout,      {.v = &layouts[6]} },
+
 	//{ MODKEY,                       XK_space,  setlayout,      {0} },
-	{ MODKEY|ShiftMask,             XK_f,  togglefloating, {0} },
+	{ MODKEY,                       XK_f,  togglefloating, {0} },
+	{ MODKEY|ShiftMask,                       XK_f,  unfloatvisible, {0} },
 
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
