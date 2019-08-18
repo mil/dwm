@@ -98,18 +98,18 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_j,      pushdown,    {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_k,      pushup,    {.i = -1 } },
 
-	{ MODKEY,                       XK_semicolon,      switchcol,     {0} },
+	{ MODKEY,                       XK_f,      switchcol,     {0} },
+	{ MODKEY|ShiftMask,             XK_f,      zoom,           {0} },
+
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
 	{ MODKEY,                       XK_o,      incnmaster,     {.i = -1 } },
 
 	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.01} },
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.01} },
-	{ MODKEY,                       XK_s,      zoom,           {0} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
 	{ MODKEY|ShiftMask,             XK_q,      killclient,     {0} },
 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
 	//{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
-	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[2]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
 	{ MODKEY,                       XK_r,      setlayout,      {.v = &layouts[3]} },
 	{ MODKEY,                       XK_g,      setlayout,      {.v = &layouts[4]} },
