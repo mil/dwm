@@ -514,6 +514,7 @@ buttonpress(XEvent *e)
 
 	fprintf(stderr, "mfact: %.2f\n", selmon->mfact);
 
+
 	columns = LENGTH(tags) / tagrows + ((LENGTH(tags) % tagrows > 0) ? 1 : 0);
 	click = ClkRootWin;
 	/* focus monitor if necessary */
@@ -2902,3 +2903,4 @@ centeredfloatingmaster(Monitor *m)
 		tx += WIDTH(c) + m->gappx;
 	}
 }
+
