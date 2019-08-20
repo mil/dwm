@@ -26,13 +26,14 @@ static const char col_gray3[]       = "#bbbbbb";
 static const char col_gray4[]       = "#eeeeee";
 static const char col_lgray[]       = "#e8e8e8";
 static const char col_cyan[]        = "#005577";
+static const char col_red[]        = "#ff3300";
 static const char col_blue[]        = /*"#002aff"; */ "#004292";
 static const char col_white[]        = "#ffffff";
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { col_gray3, col_gray1, col_lgray },
 	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan},
-	[SchemeHid]  = { col_gray4, col_cyan,  col_gray2 },
+	[SchemeHid]  = { col_red, col_cyan,  col_gray2 },
 };
 static const int focusonwheel       = 0;
 static const unsigned int gappx     = 5;        /* gap pixel between windows */
