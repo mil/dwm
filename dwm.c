@@ -268,6 +268,7 @@ static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
 static void centeredmaster(Monitor *m);
 static void centeredfloatingmaster(Monitor *m);
+static void shiftview(const Arg *arg);
 
 /* variables */
 static Client *prevzoom = NULL;
@@ -2946,3 +2947,14 @@ centeredfloatingmaster(Monitor *m)
 	}
 }
 
+void
+shiftview(const Arg *arg) {
+  Arg shifted;
+  if(arg->i > 0) // left circular shift
+          shifted.ui = (selmon->tagset[selmon->seltags] << arg->i)
+             | (selmon->tagset[selmon->seltags] >> (LENGTH(tags) - arg->i));
+  else // right circular shift
+          shifted.ui = selmon->tagset[selmon->seltags] >> (- arg->i)
+             | selmon->tagset[selmon->seltags] << (LENGTH(tags) + arg->i);
+  view(&shifted);
+}
