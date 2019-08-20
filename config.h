@@ -118,7 +118,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_Tab,    shiftview,      {.i = 1} },
 	{ MODKEY|ShiftMask,             XK_Tab,    shiftview,      {.i = -1} },
 
-	{ MODKEY|ShiftMask,             XK_q,      killclient,     {0} },
+	{ MODKEY|ShiftMask,             XK_grave,  killclient,     {0} },
 
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
 	{ MODKEY,                       XK_comma,  setlayout,      {.v = &layouts[0]} },
@@ -130,8 +130,8 @@ static Key keys[] = {
 	{ MODKEY,                       XK_f,  togglefloating, {0} },
 	{ MODKEY|ShiftMask,             XK_f,  unfloatvisible, {0} },
 
-	{ MODKEY,                       XK_0,      comboview,           {.ui = ~0 } },
-	{ MODKEY|ShiftMask,             XK_0,      combotag,            {.ui = ~0 } },
+	{ MODKEY,                       XK_t,      comboview,           {.ui = ~0 } },
+	{ MODKEY|ShiftMask,             XK_t,      combotag,            {.ui = ~0 } },
 
 
   // Todo: put on []
@@ -146,10 +146,10 @@ static Key keys[] = {
 	TAGKEYS(                        XK_3,                      2)
 	TAGKEYS(                        XK_4,                      3)
 	TAGKEYS(                        XK_5,                      4)
-	TAGKEYS(                        XK_6,                      5)
-	TAGKEYS(                        XK_7,                      6)
-	TAGKEYS(                        XK_8,                      7)
-	TAGKEYS(                        XK_9,                      8)
+	TAGKEYS(                        XK_q,                      5)
+	TAGKEYS(                        XK_w,                      6)
+	TAGKEYS(                        XK_e,                      7)
+	TAGKEYS(                        XK_r,                      8)
 	//{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
 };
 
