@@ -951,15 +951,32 @@ void drawtaggrid(Monitor *m, int *x_pos, unsigned int occ)
     XSetForeground(drw->dpy, drw->gc, scheme[SchemeHid][ColBorder].pixel);
     XFillRectangle(dpy, drw->drawable, drw->gc, x, y, h*columns + 1, bh);
 
+  int urg = 0;
+  int n = 0;
+	Client *c;
+  for (c = m->clients; c; c = c->next) {
+    if (ISVISIBLE(c))
+      n++;
+    occ |= c->tags;
+    if (c->isurgent)
+      urg |= c->tags;
+  }
+
     /* We will draw LENGTH(tags) squares in tagraws raws. */
 	for(j = 0,  i= 0; j < tagrows; j++) {
         x = *x_pos;
         for (k = 0; k < columns && i < LENGTH(tags); k++, i++) {
 		    invert = m->tagset[m->seltags] & 1 << i ? 0 : 1;
 
+        if (urg) {
+            XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeSel][ColBg].pixel :
+                                scheme[SchemeHid][ColFg].pixel);
+         } else {
             /* Select active color for current square */
             XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeSel][ColBg].pixel :
                                 scheme[SchemeNorm][ColFg].pixel);
+         }
+
             XFillRectangle(dpy, drw->drawable, drw->gc, x+1, y+1, h-1, h-1);
 
             /* Mark square if tag has client */
