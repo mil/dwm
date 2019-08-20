@@ -111,24 +111,28 @@ static Key keys[] = {
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.01} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
 	{ MODKEY|ShiftMask,             XK_q,      killclient,     {0} },
-	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
-	//{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
-	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
-	{ MODKEY,                       XK_r,      setlayout,      {.v = &layouts[3]} },
-	{ MODKEY,                       XK_g,      setlayout,      {.v = &layouts[4]} },
-	{ MODKEY,                       XK_e,      setlayout,      {.v = &layouts[5]} },
-	{ MODKEY|ShiftMask,             XK_e,      setlayout,      {.v = &layouts[6]} },
 
-	//{ MODKEY,                       XK_space,  setlayout,      {0} },
+	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
+	{ MODKEY,                       XK_comma,  setlayout,      {.v = &layouts[0]} },
+	{ MODKEY|ShiftMask,             XK_comma,  setlayout,      {.v = &layouts[4]} },
+	{ MODKEY,                       XK_period, setlayout,      {.v = &layouts[5]} },
+	{ MODKEY|ShiftMask,             XK_period, setlayout,      {.v = &layouts[6]} },
+	{ MODKEY,                       XK_slash,  setlayout,      {.v = &layouts[3]} },
+
 	{ MODKEY,                       XK_f,  togglefloating, {0} },
 	{ MODKEY|ShiftMask,             XK_f,  unfloatvisible, {0} },
 
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
-	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
-	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
-	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
-	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
+
+
+  // Todo: put on []
+	//{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
+	//{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
+	//{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
+	//{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
+
+
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)
