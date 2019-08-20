@@ -977,6 +977,10 @@ drawbar(Monitor *m)
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
+	drw_setscheme(drw, scheme[SchemeNorm]);
+	drw_rect(drw, x - 1, 0, 1, bh, 1, 0);
+
+  int cn = 0;
 	if ((w = m->ww - sw - x) > bh) {
 		if (n > 0) {
 			for (c = m->clients; c; c = c->next) {
@@ -991,8 +995,23 @@ drawbar(Monitor *m)
 				drw_setscheme(drw, scheme[scm]);
 				drw_text(drw, x, 0, (1.0 / (double)n) * w, bh, lrpad / 2, c->name, 0);
 				drw_setscheme(drw, scheme[SchemeSel]); 
-				if (c->isfloating) { drw_rect(drw, x, 0, 3, 3, 1, 0); }
+
+
+				// E.g. square on left if floating
+				if (c->isfloating) { drw_rect(drw, x + 0, 0, 4, 4, 0, 0); }
+  		  cn += 1;
 				x += (1.0 / (double)n) * w;
+
+        if (scm ==  SchemeSel) {
+          drw_rect(drw, x - 7, 2, 3, 3, 1, 0);
+        }
+
+        // TODO: some indication for master
+        //if (selmon->nmaster == cn) {  }
+
+        // E.g. draw border
+				drw_setscheme(drw, scheme[SchemeNorm]);
+				drw_rect(drw, x - 1, 0, 1, bh, 1, 0);
 			}
 		} else {
 			drw_setscheme(drw, scheme[SchemeNorm]);
