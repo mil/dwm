@@ -362,6 +362,39 @@ comboview(const Arg *arg) {
 		if (newtags)
 			selmon->tagset[selmon->seltags] = newtags;
 	}
+
+
+
+	// >> per-tag functionality
+	int i;
+	unsigned int tmptag;
+        if (arg->ui & TAGMASK) {
+                selmon->pertag->prevtag = selmon->pertag->curtag;
+ 
+                if (arg->ui == ~0)
+                        selmon->pertag->curtag = 0;
+                else {
+                        for (i = 0; !(arg->ui & 1 << i); i++) ;
+                        selmon->pertag->curtag = i + 1;
+                }
+        } else {
+                tmptag = selmon->pertag->prevtag;
+                selmon->pertag->prevtag = selmon->pertag->curtag;
+                selmon->pertag->curtag = tmptag;
+        }
+ 
+        selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag];
+        selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag];
+        selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
+        selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
+        selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
+ 
+        if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
+                togglebar(NULL);
+
+	// << per-tag functionality
+
+	
 	focus(NULL);
 	arrange(selmon);
 }
