@@ -998,6 +998,8 @@ drawbar(Monitor *m)
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, x - 1, 0, 1, bh, 1, 0);
 
+  float nmasterspace = 0;
+  int xoffset = x;
   int cn = 0;
 	if ((w = m->ww - sw - x) > bh) {
 		if (n > 0) {
@@ -1011,14 +1013,33 @@ drawbar(Monitor *m)
 				else
 					scm = SchemeNorm;
 				drw_setscheme(drw, scheme[scm]);
-				drw_text(drw, x, 0, (1.0 / (double)n) * w, bh, lrpad / 2, c->name, 0);
+
+
+  		  cn += 1;
+        int adds;
+        if (
+          &tile == c->mon->lt[c->mon->sellt]->arrange ||
+          &deck == c->mon->lt[c->mon->sellt]->arrange 
+        ) {
+          if (cn <= m->nmaster) {
+            nmasterspace = MIN(w, (double)(c->w + c->x - xoffset));
+            adds = nmasterspace / (double)m->nmaster;
+            fprintf(stderr, "GONMASTER INP CW (%d) CX (%d) X (%d) NMSP (%d) (NMASET=%d) %d\n",c->w, c->x, xoffset, nmasterspace,      m->nmaster, adds);
+          } else {
+            adds = ((1.0 / (double)(n - m->nmaster)) * (w - nmasterspace));
+            fprintf(stderr, "GOSTACKITEM %d\n", adds);
+          }
+        } else {
+          adds = (1.0 / (double)(n)) * w;
+        }
+
+				drw_text(drw, x, 0, adds, bh, lrpad / 2, c->name, 0);
 				drw_setscheme(drw, scheme[SchemeSel]); 
 
 
 				// E.g. square on left if floating
 				if (c->isfloating) { drw_rect(drw, x + 0, 0, 4, 4, 0, 0); }
-  		  cn += 1;
-				x += (1.0 / (double)n) * w;
+				x += adds;
 
         if (scm ==  SchemeSel) {
           drw_rect(drw, x - 7, 2, 3, 3, 1, 0);
@@ -1954,10 +1975,12 @@ setlayout(const Arg *arg)
 	if (arg && arg->v)
 		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt] = (Layout *)arg->v;
 	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
-	if (selmon->sel)
+	fprintf(stderr, "FOOB %d", selmon->sellt);
+	if (selmon->sel) {
 		arrange(selmon);
-	else
+	} else {
 		drawbar(selmon);
+	}
 }
 
 /* arg > 1.0 will set mfact absolutely */
