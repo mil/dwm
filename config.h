@@ -123,9 +123,9 @@ static Key keys[] = {
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
 	{ MODKEY,                       XK_comma,  setlayout,      {.v = &layouts[0]} },
 	{ MODKEY|ShiftMask,             XK_comma,  setlayout,      {.v = &layouts[4]} },
-	{ MODKEY,                       XK_period, setlayout,      {.v = &layouts[5]} },
-	{ MODKEY|ShiftMask,             XK_period, setlayout,      {.v = &layouts[6]} },
-	{ MODKEY,                       XK_slash,  setlayout,      {.v = &layouts[3]} },
+	{ MODKEY,                       XK_period,  setlayout,      {.v = &layouts[3]} },
+	{ MODKEY,                       XK_slash, setlayout,      {.v = &layouts[5]} },
+	{ MODKEY|ShiftMask,             XK_slash, setlayout,      {.v = &layouts[6]} },
 
 	{ MODKEY,                       XK_f,  togglefloating, {0} },
 	{ MODKEY|ShiftMask,             XK_f,  unfloatvisible, {0} },
