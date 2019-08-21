@@ -13,6 +13,7 @@
 
 static const unsigned int drawtagmask = DRAWTAGGRID; /* | DRAWCLASSICTAGS to show classic row of tags */
 static const int tagrows = 2;
+static const int attachbelow = 1; // e.g. attaches below not above
 /* appearance */
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 1;       /* snap pixel */
