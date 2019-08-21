@@ -608,8 +608,6 @@ buttonpress(XEvent *e)
 	Monitor *m;
 	XButtonPressedEvent *ev = &e->xbutton;
 
-	fprintf(stderr, "mfact: %.2f\n", selmon->mfact);
-
 	columns = LENGTH(tags) / tagrows + ((LENGTH(tags) % tagrows > 0) ? 1 : 0);
 	click = ClkRootWin;
 	/* focus monitor if necessary */
@@ -998,6 +996,7 @@ drawbar(Monitor *m)
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, x - 1, 0, 1, bh, 1, 0);
 
+  float nmasterstart = 0;
   float nmasterspace = 0;
   int xoffset = x;
   int cn = 0;
@@ -1024,11 +1023,32 @@ drawbar(Monitor *m)
           if (cn <= m->nmaster) {
             nmasterspace = MIN(w, (double)(c->w + c->x - xoffset));
             adds = nmasterspace / (double)m->nmaster;
-            fprintf(stderr, "GONMASTER INP CW (%d) CX (%d) X (%d) NMSP (%d) (NMASET=%d) %d\n",c->w, c->x, xoffset, nmasterspace,      m->nmaster, adds);
           } else {
             adds = ((1.0 / (double)(n - m->nmaster)) * (w - nmasterspace));
-            fprintf(stderr, "GOSTACKITEM %d\n", adds);
           }
+        } else if (&centeredmaster == c->mon->lt[c->mon->sellt]->arrange) {
+          if (cn <= m->nmaster) {
+            x = c->x + ((cn - 1) * (c->w/m->nmaster));
+            adds = (c->w/m->nmaster);
+          } else {
+            int col = (cn - m->nmaster) % 2;
+            int ntabs_left  = ((n - m->nmaster) / (double)2);
+            int ntabs_right = ((n - m->nmaster) / (double)2) + 0.5;
+
+            if (col == 0) {
+              int pushn = (cn / 2) - 0.5;
+              int tabw = ((c->w - xoffset)/ntabs_left);
+              x = xoffset + (tabw * pushn);
+              adds = tabw;
+            } else if (col == 1) {
+              int pushn = (((double)cn / (double) 2)) - 1;
+
+              int tabw = ((c->w - sw)/ntabs_right);
+              x = c->x + (tabw * pushn);
+              adds = tabw;
+            }
+          }
+        
         } else {
           adds = (1.0 / (double)(n)) * w;
         }
@@ -1975,7 +1995,6 @@ setlayout(const Arg *arg)
 	if (arg && arg->v)
 		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt] = (Layout *)arg->v;
 	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
-	fprintf(stderr, "FOOB %d", selmon->sellt);
 	if (selmon->sel) {
 		arrange(selmon);
 	} else {
