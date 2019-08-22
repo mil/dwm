@@ -37,11 +37,11 @@ static const char *colors[][3]      = {
 	[SchemeHid]  = { col_red, col_cyan,  col_gray2 },
 };
 static const int focusonwheel       = 0;
-static const unsigned int gappx     = 3;        /* gap pixel between windows */
+static const unsigned int gappx     = 5;        /* gap pixel between windows */
  
 
 /* tagging */
-static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+static const char *tags[] = { "1", "2", "3", "4", "5", "6"/*, "7", "8", "9" */};
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -121,9 +121,9 @@ static Key keys[] = {
 
 	{ MODKEY|ShiftMask,             XK_grave,  killclient,     {0} },
 
+	{ MODKEY,             					XK_n,      setlayout,      {.v = &layouts[4]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
 	{ MODKEY,                       XK_comma,  setlayout,      {.v = &layouts[0]} },
-	{ MODKEY|ShiftMask,             XK_comma,  setlayout,      {.v = &layouts[4]} },
 	{ MODKEY,                       XK_period,  setlayout,      {.v = &layouts[3]} },
 	{ MODKEY,                       XK_slash, setlayout,      {.v = &layouts[5]} },
 	{ MODKEY|ShiftMask,             XK_slash, setlayout,      {.v = &layouts[6]} },
@@ -145,12 +145,13 @@ static Key keys[] = {
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)
-	TAGKEYS(                        XK_4,                      3)
-	TAGKEYS(                        XK_5,                      4)
-	TAGKEYS(                        XK_q,                      5)
-	TAGKEYS(                        XK_w,                      6)
-	TAGKEYS(                        XK_e,                      7)
-	TAGKEYS(                        XK_r,                      8)
+
+	TAGKEYS(                        XK_q,                      3)
+	TAGKEYS(                        XK_w,                      4)
+	TAGKEYS(                        XK_e,                      5)
+	//TAGKEYS(                        XK_w,                      6)
+	//TAGKEYS(                        XK_e,                      7)
+	//TAGKEYS(                        XK_r,                      8)
 	//{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
 };
 
