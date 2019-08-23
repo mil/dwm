@@ -37,7 +37,7 @@ static const char *colors[][3]      = {
 	//[SchemeHid]  = { col_red, col_cyan,  col_gray2 },
 };
 static const int focusonwheel       = 0;
-static const unsigned int gappx     = 1;        /* gap pixel between windows */
+static const unsigned int gappx     = 0;        /* gap pixel between windows */
  
 
 /* tagging */
@@ -63,14 +63,20 @@ static const int resizehints = 0;    /* 1 means respect size hints in tiled resi
 #include "unfloat.c"
 static const Layout layouts[] = {
 	/* symbol     arrange function */
-	{ "[=]",      tile },    /* first entry is default */
-	{ "[F]",      NULL },    /* no layout function means floating behavior */
-	{ "[M]",      monocle },
-	{ "[D]",      deck },
-	{ "[G]",      grid },
-	{ "|M|",      centeredmaster },
-	{  "☀",       centeredfloatingmaster }
+	{ "T",      tile },    /* first entry is default */
+	{ "F",      NULL },    /* no layout function means floating behavior */
+	{ "M",      monocle },
+	{ "D",      deck },
+	{ "G",      grid },
+	{ "C",      centeredmaster }
 };
+
+#define LTILE 0
+#define LFLOAT 1
+#define LMONOCOLE 2
+#define LDECK 3
+#define LGRID 4
+#define LCENTEREDMASTER 5
 
 /* key definitions */
 #define MODKEY Mod1Mask
@@ -121,12 +127,12 @@ static Key keys[] = {
 
 	{ MODKEY|ShiftMask,             XK_grave,  killclient,     {0} },
 
-	{ MODKEY,             					XK_n,      setlayout,      {.v = &layouts[4]} },
-	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
-	{ MODKEY,                       XK_comma,  setlayout,      {.v = &layouts[0]} },
-	{ MODKEY,                       XK_period,  setlayout,      {.v = &layouts[3]} },
-	{ MODKEY,                       XK_slash, setlayout,      {.v = &layouts[5]} },
-	{ MODKEY|ShiftMask,             XK_slash, setlayout,      {.v = &layouts[6]} },
+	{ MODKEY,             					XK_n,      setlayout,      {.v = &layouts[LGRID]} },
+	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[LMONOCOLE]} },
+	{ MODKEY,                       XK_comma,  setlayout,      {.v = &layouts[LTILE]} },
+	{ MODKEY,                       XK_period,  setlayout,      {.v = &layouts[LDECK]} },
+	{ MODKEY,                       XK_slash, setlayout,      {.v = &layouts[LCENTEREDMASTER]} },
+	{ MODKEY|ShiftMask,             XK_slash, setlayout,      {.v = &layouts[LFLOAT]} },
 
 	{ MODKEY,                       XK_f,  togglefloating, {0} },
 	{ MODKEY|ShiftMask,             XK_f,  unfloatvisible, {0} },
