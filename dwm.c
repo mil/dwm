@@ -1001,7 +1001,7 @@ void drawtaggrid(Monitor *m, int *x_pos, unsigned int occ)
 
     /* Firstly we will fill the borders of squares */
 
-    XSetForeground(drw->dpy, drw->gc, scheme[SchemeHid][ColBorder].pixel);
+    XSetForeground(drw->dpy, drw->gc, scheme[SchemeNorm][ColBg].pixel);
     XFillRectangle(dpy, drw->drawable, drw->gc, x, y, h*columns + 1, bh);
 
   int urg = 0;
@@ -1023,7 +1023,7 @@ void drawtaggrid(Monitor *m, int *x_pos, unsigned int occ)
 
         if (urg) {
             XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeSel][ColBg].pixel :
-                                scheme[SchemeHid][ColFg].pixel);
+                                scheme[SchemeNorm][ColFg].pixel);
          } else {
             /* Select active color for current square */
             XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeSel][ColBg].pixel :
