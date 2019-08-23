@@ -954,7 +954,7 @@ drawbar(Monitor *m)
   struct TabData tabdata;
   int jj;
   for (jj = 0; jj < 5; jj++) {
-    tabdata.groupx[jj] = 0;
+    tabdata.groupx[jj] = -1;
     tabdata.groupn[jj] = 0;
     tabdata.groupi[jj] = 0;
   }
@@ -962,7 +962,8 @@ drawbar(Monitor *m)
 	for (c = m->clients; c; c = c->next) {
 	 if (ISVISIBLE(c)) {
   	  int j;
-  		for (j = 0; tabdata.groupx[j] != 0 && c-> x != tabdata.groupx[j] && j < 5; j++) {
+  		for (j = 0; j < 5; j++) {
+        if (tabdata.groupx[j] == -1 || c-> x == tabdata.groupx[j]) { break; }
   		  j += 1;
   		}
   		tabdata.groupx[j] = c->x;
@@ -1011,15 +1012,20 @@ drawbar(Monitor *m)
       if (c->x + c->w > m->ww - sw) { fullw = fullw - sw; }
       clientwidth = fullw / (double) tabdata.groupn[i];
       clientx = c->x + indent + (clientwidth * tabdata.groupi[i]);
-      tabdata.groupi[i]++;
 
 			drw_setscheme(drw, scheme[m->sel == c ? SchemeSel : SchemeNorm]); 
-			drw_text(drw, clientx, 0, clientwidth, bh, lrpad / 2, c->name, 0);
-      drw_rect(drw, clientx - 1, 0, 1, bh, 1, 0);
-      drw_rect(drw, clientx + clientwidth + 1, 0, 1, bh, 1, 0);
+			drw_text(drw, clientx + 1, 0, clientwidth - 2, bh, lrpad / 2, c->name, 0);
 
+			if (tabdata.groupi[i] == 0 || m->sel == c) {
+        drw_rect(drw, clientx, 0, 1, bh, 1, 0);
+			}
+      drw_rect(drw, clientx + clientwidth - 1, 0, 1, bh, 1, 0);
+
+      tabdata.groupi[i]++;
 	  }
 	}
+	//drw_setscheme(drw, scheme[SchemeSel]); 
+  //drw_rect(drw, 0, bh - 2, m->ww, 1, 1, 0);
 	drw_map(drw, m->barwin, 0, 0, m->ww, bh);
 }
 
