@@ -37,7 +37,7 @@ static const char *colors[][3]      = {
 	//[SchemeHid]  = { col_red, col_cyan,  col_gray2 },
 };
 static const int focusonwheel       = 0;
-static const unsigned int gappx     = 5;        /* gap pixel between windows */
+static const unsigned int gappx     = 1;        /* gap pixel between windows */
  
 
 /* tagging */
