@@ -1012,6 +1012,9 @@ drawbar(Monitor *m)
 
 			drw_setscheme(drw, scheme[m->sel == c ? SchemeSel : SchemeNorm]); 
 			drw_text(drw, clientx, 0, clientwidth, bh, lrpad / 2, c->name, 0);
+      drw_rect(drw, clientx - 1, 0, 1, bh, 1, 0);
+      drw_rect(drw, clientx + clientwidth + 1, 0, 1, bh, 1, 0);
+
 	  }
 	}
 	drw_map(drw, m->barwin, 0, 0, m->ww, bh);
