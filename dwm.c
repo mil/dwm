@@ -185,6 +185,7 @@ static Monitor *dirtomon(int dir);
 static void drawbar(Monitor *m);
 static void drawbars(void);
 static void drawtaggrid(Monitor *m, int *x_pos, unsigned int occ);
+static void drawbartabs(Monitor *m, int x, int sw);
 static void enternotify(XEvent *e);
 static void expose(XEvent *e);
 static Client *findbefore(Client *c);
@@ -979,30 +980,7 @@ drawbar(Monitor *m)
 		drw_text(drw, m->ww - sw, 0, sw, bh, 0, stext, 0);
 	}
  
-  struct TabData {
-    int groupx[5];
-    int groupn[5];
-    int groupi[5];
-  };
-  struct TabData tabdata;
-  int jj;
-  for (jj = 0; jj < 5; jj++) {
-    tabdata.groupx[jj] = -1;
-    tabdata.groupn[jj] = 0;
-    tabdata.groupi[jj] = 0;
-  }
-
 	for (c = m->clients; c; c = c->next) {
-	 if (ISVISIBLE(c)) {
-  	  int j;
-  		for (j = 0; j < 5; j++) {
-        if (tabdata.groupx[j] == -1 || c-> x == tabdata.groupx[j]) { break; }
-  		  j += 1;
-  		}
-  		tabdata.groupx[j] = c->x;
-  		tabdata.groupn[j]++;
-		}
-
 		occ |= c->tags;
 		if (c->isurgent)
 			urg |= c->tags;
@@ -1026,39 +1004,7 @@ drawbar(Monitor *m)
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
-	if ((w = m->ww - sw - x) > bh) {
-		drw_setscheme(drw, scheme[SchemeNorm]);
-		drw_rect(drw, x, 0, w, bh, 1, 1);
-		for (c = m->clients; c; c = c->next) {
-			if (!ISVISIBLE(c)) { continue; }
-
-      for (i = 0; i < 5; i++) {
-      	if (tabdata.groupx[i] == c->x) {
-        	break;
-        }
-      }
-      int clientwidth;
-      int clientx;
-      int fullw = c-> w;
-      int indent = 0;
-      if (c->x < x) { indent = x; fullw = fullw - x; }
-      if (c->x + c->w > m->ww - sw) { fullw = fullw - sw; }
-      clientwidth = fullw / (double) tabdata.groupn[i];
-      clientx = c->x + indent + (clientwidth * tabdata.groupi[i]);
-
-			drw_setscheme(drw, scheme[m->sel == c ? SchemeSel : SchemeNorm]); 
-			drw_text(drw, clientx + 1, 0, clientwidth - 2, bh, lrpad / 2, c->name, 0);
-
-			if (tabdata.groupi[i] == 0 || m->sel == c) {
-        drw_rect(drw, clientx, 0, 1, bh, 1, 0);
-			}
-      drw_rect(drw, clientx + clientwidth - 1, 0, 1, bh, 1, 0);
-
-      tabdata.groupi[i]++;
-	  }
-	}
-	//drw_setscheme(drw, scheme[SchemeSel]); 
-  //drw_rect(drw, 0, bh - 2, m->ww, 1, 1, 0);
+	drawbartabs(m, x, sw);
 	drw_map(drw, m->barwin, 0, 0, m->ww, bh);
 }
 
@@ -1070,6 +1016,102 @@ drawbars(void)
 	for (m = mons; m; m = m->next)
 		drawbar(m);
 }
+
+void drawbartabs(Monitor *m, int x, int sw) {
+	Client *c;
+
+  struct TabData {
+    int groupx[5];
+    int groupn[5];
+    int groupi[5];
+    int groupstart[5];
+    int groupend[5];
+  };
+  int FUZZ_SIZE = 12;
+  struct TabData tabdata;
+  int jj;
+  for (jj = 0; jj < 5; jj++) {
+    tabdata.groupx[jj] = -1;
+    tabdata.groupn[jj] = 0;
+    tabdata.groupi[jj] = 0;
+    tabdata.groupstart[jj] = 0;
+    tabdata.groupend[jj] = 0;
+  }
+
+	for (c = m->clients; c; c = c->next) {
+	 if (ISVISIBLE(c)) {
+  	  int j;
+  		for (j = 0; j < 5; j++) {
+        if (tabdata.groupx[j] == -1 || c-> x == tabdata.groupx[j]) { break; }
+  		  j += 1;
+  		}
+  		tabdata.groupx[j] = c->x;
+  		tabdata.groupstart[j] = c->x;
+  		tabdata.groupend[j] = c->x + c->w;
+
+		  if (j > 0 && abs(tabdata.groupend[0] - tabdata.groupstart[j]) < FUZZ_SIZE)
+		    tabdata.groupend[0] = tabdata.groupstart[j];
+		  if (j > 0 && abs(tabdata.groupstart[0] - tabdata.groupend[j]) < FUZZ_SIZE)
+		    tabdata.groupstart[0] = tabdata.groupend[j];
+
+  		tabdata.groupn[j]++;
+		}
+	}
+
+  int nn = 0;
+  int activex = 0;
+  int activew = 0;
+	if (m->ww - sw - x > bh) {
+		drw_setscheme(drw, scheme[SchemeNorm]);
+		drw_rect(drw, x, 0, m->ww - sw - x, bh, 1, 1);
+		for (c = m->clients; c; c = c->next) {
+			if (!ISVISIBLE(c)) continue;
+			nn++;
+
+      int clientwidth;
+      int clientx;
+			if (NULL == c->mon->lt[c->mon->sellt]->arrange) {
+        // E.g. in floating layout - just show all items as tabs
+			} else {
+				int i;
+        for (i = 0; i < 5; i++) if (tabdata.groupx[i] == c->x) break;
+
+        int fullw = tabdata.groupend[i] - tabdata.groupstart[i];
+        int indent = 0;
+        if (tabdata.groupstart[i] < x) { indent = x; fullw = fullw - x; }
+        if (tabdata.groupend[i] > m->ww - sw) { fullw = fullw - sw; }
+        clientwidth = fullw / (double) tabdata.groupn[i];
+        clientx = tabdata.groupstart[i] + indent + (clientwidth * tabdata.groupi[i]);
+
+	      if (nn > m->nmaster && tabdata.groupn[i] == tabdata.groupi[i] + 1) {
+	        clientwidth += (c->x + c->w) - (clientx + clientwidth);
+	        clientwidth -= MAX(0, (clientx + clientwidth) - (m->ww - sw));
+	      }
+	      tabdata.groupi[i]++;
+			}
+
+
+      if (m->sel == c) {
+        activex = clientx;
+        activew = clientwidth;
+      } else {
+  			drw_setscheme(drw, scheme[SchemeNorm]); 
+  			drw_text(drw, clientx, 0, clientwidth - 1, bh, lrpad / 2, c->name, 0);
+        drw_rect(drw, clientx, 0, 1, bh, 1, 0);
+        drw_rect(drw, clientx + clientwidth, 0, 1, bh, 1, 0);
+      }
+	  }
+	}
+
+  if (m->sel) {
+  	drw_setscheme(drw, scheme[SchemeSel]); 
+  	drw_text(drw, activex, 0, activew, bh, lrpad / 2, m->sel->name, 0);
+    drw_rect(drw, activex, 0, 1, bh, 1, 0);
+    drw_rect(drw, activex + activew, 0, 1, bh, 1, 0);
+  }
+}
+
+
 void drawtaggrid(Monitor *m, int *x_pos, unsigned int occ)
 {
     unsigned int x, y, h, max_x, columns;
