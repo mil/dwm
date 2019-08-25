@@ -37,7 +37,7 @@ static const char *colors[][3]      = {
 	//[SchemeHid]  = { col_red, col_cyan,  col_gray2 },
 };
 static const int focusonwheel       = 0;
-static const unsigned int gappx     = 0;        /* gap pixel between windows */
+static const unsigned int gappx     = 5;        /* gap pixel between windows */
  
 
 /* tagging */
@@ -68,7 +68,8 @@ static const Layout layouts[] = {
 	{ "M",      monocle },
 	{ "D",      deck },
 	{ "G",      grid },
-	{ "C",      centeredmaster }
+	{ "C",      centeredmaster },
+	{ "DD",     deckdouble }
 };
 
 #define LTILE 0
@@ -77,6 +78,7 @@ static const Layout layouts[] = {
 #define LDECK 3
 #define LGRID 4
 #define LCENTEREDMASTER 5
+#define LDECKDOUBLE 6
 
 /* key definitions */
 #define MODKEY Mod1Mask
@@ -131,6 +133,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[LMONOCOLE]} },
 	{ MODKEY,                       XK_comma,  setlayout,      {.v = &layouts[LTILE]} },
 	{ MODKEY,                       XK_period,  setlayout,      {.v = &layouts[LDECK]} },
+	{ MODKEY|ShiftMask,             XK_period,  setlayout,      {.v = &layouts[LDECKDOUBLE]} },
 	{ MODKEY,                       XK_slash, setlayout,      {.v = &layouts[LCENTEREDMASTER]} },
 	{ MODKEY|ShiftMask,             XK_slash, setlayout,      {.v = &layouts[LFLOAT]} },
 
