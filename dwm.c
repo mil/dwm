@@ -61,7 +61,7 @@
 
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel }; /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeTabInactive, SchemeTabActiveGroup, SchemeTabActiveWin }; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
        NetWMWindowTypeDialog, NetClientList, NetLast }; /* EWMH atoms */
@@ -1018,6 +1018,16 @@ drawbars(void)
 		drawbar(m);
 }
 
+
+void draw_with_border(Client *c, int x, int w, int scheme_n) {
+  if (c) {
+  	drw_setscheme(drw, scheme[scheme_n]); 
+  	drw_text(drw, x, 0, w, bh, lrpad / 2, c->name, 0);
+    drw_rect(drw, x, 0, 1, bh, 1, 0);
+    drw_rect(drw, x + w, 0, 1, bh, 1, 0);
+  }
+}
+
 void drawbartabs(Monitor *m, int x, int sw) {
 	Client *c;
 
@@ -1025,6 +1035,7 @@ void drawbartabs(Monitor *m, int x, int sw) {
     int groupx[5];
     int groupn[5];
     int groupi[5];
+    int groupactive[5];
     int groupstart[5];
     int groupend[5];
   };
@@ -1037,6 +1048,7 @@ void drawbartabs(Monitor *m, int x, int sw) {
     tabdata.groupi[jj] = 0;
     tabdata.groupstart[jj] = 0;
     tabdata.groupend[jj] = 0;
+    tabdata.groupactive[jj] = 0;
   }
 
 	for (c = m->clients; c; c = c->next) {
@@ -1049,6 +1061,7 @@ void drawbartabs(Monitor *m, int x, int sw) {
   		tabdata.groupx[j] = c->x;
   		tabdata.groupstart[j] = c->x;
   		tabdata.groupend[j] = c->x + c->w;
+  		if (m->sel == c) { tabdata.groupactive[j] = True; }
 
 		  if (j > 0 && abs(tabdata.groupend[0] - tabdata.groupstart[j]) < FUZZ_SIZE)
 		    tabdata.groupend[0] = tabdata.groupstart[j];
@@ -1066,15 +1079,14 @@ void drawbartabs(Monitor *m, int x, int sw) {
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		drw_rect(drw, x, 0, m->ww - sw - x, bh, 1, 1);
 		for (c = m->clients; c; c = c->next) {
-			if (!ISVISIBLE(c)) continue;
-			nn++;
+		  if (!ISVISIBLE(c)) continue;
 
+			int i;
       int clientwidth;
       int clientx;
 			if (NULL == c->mon->lt[c->mon->sellt]->arrange) {
         // E.g. in floating layout - just show all items as tabs
 			} else {
-				int i;
         for (i = 0; i < 5; i++) if (tabdata.groupx[i] == c->x) break;
 
         int fullw = tabdata.groupend[i] - tabdata.groupstart[i];
@@ -1091,25 +1103,17 @@ void drawbartabs(Monitor *m, int x, int sw) {
 	      tabdata.groupi[i]++;
 			}
 
-
       if (m->sel == c) {
         activex = clientx;
         activew = clientwidth;
       } else {
-  			drw_setscheme(drw, scheme[SchemeNorm]); 
-  			drw_text(drw, clientx, 0, clientwidth - 1, bh, lrpad / 2, c->name, 0);
-        drw_rect(drw, clientx, 0, 1, bh, 1, 0);
-        drw_rect(drw, clientx + clientwidth, 0, 1, bh, 1, 0);
+        draw_with_border(c, clientx, clientwidth, tabdata.groupactive[i] ? SchemeTabActiveGroup : SchemeTabInactive);
       }
 	  }
+	  draw_with_border(m->sel, activex, activew, SchemeTabActiveWin);
 	}
-
-  if (m->sel) {
-  	drw_setscheme(drw, scheme[SchemeSel]); 
-  	drw_text(drw, activex, 0, activew, bh, lrpad / 2, m->sel->name, 0);
-    drw_rect(drw, activex, 0, 1, bh, 1, 0);
-    drw_rect(drw, activex + activew, 0, 1, bh, 1, 0);
-  }
+	drw_setscheme(drw, scheme[SchemeNorm]);
+	drw_rect(drw, x, bh - 1, m->ww - sw - x, 1, 0, 1);
 }
 
 
