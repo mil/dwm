@@ -69,7 +69,8 @@ static const Layout layouts[] = {
 	{ "D",      deck },
 	{ "G",      grid },
 	{ "C",      centeredmaster },
-	{ "DD",     deckdouble }
+	{ "DD",     deckdouble },
+	{ "COL",     col }
 };
 
 #define LTILE 0
@@ -79,6 +80,7 @@ static const Layout layouts[] = {
 #define LGRID 4
 #define LCENTEREDMASTER 5
 #define LDECKDOUBLE 6
+#define LCOL 7
 
 /* key definitions */
 #define MODKEY Mod1Mask
@@ -132,6 +134,7 @@ static Key keys[] = {
 	{ MODKEY,             					XK_n,      setlayout,      {.v = &layouts[LGRID]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[LMONOCOLE]} },
 	{ MODKEY,                       XK_comma,  setlayout,      {.v = &layouts[LTILE]} },
+	{ MODKEY|ShiftMask,             XK_comma,  setlayout,      {.v = &layouts[LCOL]} },
 	{ MODKEY,                       XK_period,  setlayout,      {.v = &layouts[LDECK]} },
 	{ MODKEY|ShiftMask,             XK_period,  setlayout,      {.v = &layouts[LDECKDOUBLE]} },
 	{ MODKEY,                       XK_slash, setlayout,      {.v = &layouts[LCENTEREDMASTER]} },
