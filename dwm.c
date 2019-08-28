@@ -1052,7 +1052,7 @@ void drawbartabs(Monitor *m, int x, int sw) {
   }
 
 	for (c = m->clients; c; c = c->next) {
-	 if (ISVISIBLE(c)) {
+	 if (ISVISIBLE(c) && !c->isfloating) {
   	  int j;
   		for (j = 0; j < 5; j++) {
         if (tabdata.groupx[j] == -1 || c-> x == tabdata.groupx[j]) { break; }
@@ -1079,7 +1079,7 @@ void drawbartabs(Monitor *m, int x, int sw) {
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		drw_rect(drw, x, 0, m->ww - sw - x, bh, 1, 1);
 		for (c = m->clients; c; c = c->next) {
-		  if (!ISVISIBLE(c)) continue;
+		  if (!ISVISIBLE(c) || c->isfloating) continue;
 
 			int i;
       int clientwidth;
@@ -1110,8 +1110,16 @@ void drawbartabs(Monitor *m, int x, int sw) {
         draw_with_border(c, clientx, clientwidth, tabdata.groupactive[i] ? SchemeTabActiveGroup : SchemeTabInactive);
       }
 	  }
-	  draw_with_border(m->sel, activex, activew, SchemeTabActiveWin);
+	  if (m->sel && !(m->sel->isfloating)) {
+  	  draw_with_border(m->sel, activex, activew, SchemeTabActiveWin);
+	  }
+		for (c = m->clients; c; c = c->next) {
+		  if (!ISVISIBLE(c) || !c->isfloating) continue;
+    	drw_setscheme(drw, scheme[m->sel == c ? SchemeSel : SchemeNorm]);
+    	drw_rect(drw, c->x, bh - 5, 4, 4, 0, 1);
+		}
 	}
+	
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, x, bh - 1, m->ww - sw - x, 1, 0, 1);
 }
