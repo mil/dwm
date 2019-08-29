@@ -1044,11 +1044,8 @@ struct TabData {
 
 void drawbartabs(Monitor *m, int x, int sw) {
 	Client *c;
-	struct TabData *tabdata_root = NULL, *tabdata, *f, *p;
-	int nn = 0;
+	struct TabData *tabdata_root = NULL, *tabdata, *f;
 
-	// Make linked list for tab groups
-	// (TODO: should this & freeing move to where window spawn/die?):
 	for (c = m->clients; c; c = c->next) {
 		if (ISVISIBLE(c) && !c->isfloating) {
 			tabdata = tabdata_root;
@@ -1060,17 +1057,21 @@ void drawbartabs(Monitor *m, int x, int sw) {
 				if (!tabdata) { tabdata_root = f; }
 				if (tabdata && tabdata->groupx != c->x) { tabdata->next = f; }
 				tabdata = f;
+
+				for (f = tabdata_root; f; f = f->next) {
+					if (tabdata != f && abs(tabdata->groupend - f->groupx) < BARTABS_FUZZ_SIZE) {
+					  f->groupstart = (f->groupx + tabdata->groupend) / 2.0;
+					  tabdata->groupend = f->groupstart;
+					}
+					if (tabdata != f && abs(tabdata->groupstart - f->groupend) < BARTABS_FUZZ_SIZE) {
+					  f->groupend = (f->groupend + tabdata->groupstart) / 2.0;
+					  tabdata->groupstart = f->groupend;
+					}
+				}
+
 			}
 			tabdata->groupn++;
 			if (m->sel == c) { tabdata->groupactive = True; }
-			for (p = tabdata_root; p; p = p->next) {
-				if (tabdata != p && abs(tabdata->groupend - p->groupstart) < BARTABS_FUZZ_SIZE) {
-					tabdata->groupend = p->groupstart;
-				}
-				if (tabdata != p && abs(tabdata->groupstart - p->groupend) < BARTABS_FUZZ_SIZE) {
-					tabdata->groupstart = p->groupend;
-				}
-			}
 		}
 	}
 
@@ -1114,7 +1115,6 @@ void drawbartabs(Monitor *m, int x, int sw) {
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		drw_rect(drw, x, bh - 1, m->ww - sw - x, 1, 0, 1);
 	}
-
 	while (tabdata_root != NULL) {
 		tabdata = tabdata_root;
 		tabdata_root = tabdata_root->next;
