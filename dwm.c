@@ -1028,100 +1028,98 @@ void draw_with_border(Client *c, int x, int w, int scheme_n) {
   }
 }
 
+// TODO: move this up to top
+#define BARTABS_FUZZ_SIZE 12
+#define BARTABS_DRAW_FLOAT_SQUARES 1
+#define BARTABS_DRAW_BOTTOM_BORDER 1
+struct TabData {
+	int groupx;
+	int groupn;
+	int groupi;
+	int groupactive;
+	int groupstart;
+	int groupend;
+	struct TabData * next;
+};
+
 void drawbartabs(Monitor *m, int x, int sw) {
 	Client *c;
+	struct TabData *tabdata_root = NULL, *tabdata, *f, *p;
+	int nn = 0;
 
-  struct TabData {
-    int groupx[5];
-    int groupn[5];
-    int groupi[5];
-    int groupactive[5];
-    int groupstart[5];
-    int groupend[5];
-  };
-  int FUZZ_SIZE = 12;
-  struct TabData tabdata;
-  int jj;
-  for (jj = 0; jj < 5; jj++) {
-    tabdata.groupx[jj] = -1;
-    tabdata.groupn[jj] = 0;
-    tabdata.groupi[jj] = 0;
-    tabdata.groupstart[jj] = 0;
-    tabdata.groupend[jj] = 0;
-    tabdata.groupactive[jj] = 0;
-  }
-
+	// Make linked list for tab groups
+	// (TODO: should this & freeing move to where window spawn/die?):
 	for (c = m->clients; c; c = c->next) {
-	 if (ISVISIBLE(c) && !c->isfloating) {
-  	  int j;
-  		for (j = 0; j < 5; j++) {
-        if (tabdata.groupx[j] == -1 || c-> x == tabdata.groupx[j]) { break; }
-  		  j += 1;
-  		}
-  		tabdata.groupx[j] = c->x;
-  		tabdata.groupstart[j] = c->x;
-  		tabdata.groupend[j] = c->x + c->w;
-  		if (m->sel == c) { tabdata.groupactive[j] = True; }
-
-		  if (j > 0 && abs(tabdata.groupend[0] - tabdata.groupstart[j]) < FUZZ_SIZE)
-		    tabdata.groupend[0] = tabdata.groupstart[j];
-		  if (j > 0 && abs(tabdata.groupstart[0] - tabdata.groupend[j]) < FUZZ_SIZE)
-		    tabdata.groupstart[0] = tabdata.groupend[j];
-
-  		tabdata.groupn[j]++;
-		}
-	}
-
-  int nn = 0;
-  int activex = 0;
-  int activew = 0;
-	if (m->ww - sw - x > bh) {
-		drw_setscheme(drw, scheme[SchemeNorm]);
-		drw_rect(drw, x, 0, m->ww - sw - x, bh, 1, 1);
-		for (c = m->clients; c; c = c->next) {
-		  if (!ISVISIBLE(c) || c->isfloating) continue;
-
-			int i;
-      int clientwidth;
-      int clientx;
-			if (NULL == c->mon->lt[c->mon->sellt]->arrange) {
-        // E.g. in floating layout - just show all items as tabs
-			} else {
-        for (i = 0; i < 5; i++) if (tabdata.groupx[i] == c->x) break;
-
-        int fullw = tabdata.groupend[i] - tabdata.groupstart[i];
-        int indent = 0;
-        if (tabdata.groupstart[i] < x) { indent = x; fullw = fullw - x; }
-        if (tabdata.groupend[i] > m->ww - sw) { fullw = fullw - sw; }
-        clientwidth = fullw / (double) tabdata.groupn[i];
-        clientx = tabdata.groupstart[i] + indent + (clientwidth * tabdata.groupi[i]);
-
-	      if (nn > m->nmaster && tabdata.groupn[i] == tabdata.groupi[i] + 1) {
-	        clientwidth += (c->x + c->w) - (clientx + clientwidth);
-	        clientwidth -= MAX(0, (clientx + clientwidth) - (m->ww - sw));
-	      }
-	      tabdata.groupi[i]++;
+		if (ISVISIBLE(c) && !c->isfloating) {
+			tabdata = tabdata_root;
+			for (tabdata = tabdata_root; tabdata && tabdata->groupx != c->x && tabdata->next; tabdata = tabdata->next);
+			if (!tabdata || (tabdata && tabdata->groupx != c->x)) {
+				f = calloc(1, sizeof(struct TabData));
+				f->groupstart = f->groupx = c->x;
+				f->groupend = c->x + c->w;
+				if (!tabdata) { tabdata_root = f; }
+				if (tabdata && tabdata->groupx != c->x) { tabdata->next = f; }
+				tabdata = f;
 			}
-
-      if (m->sel == c) {
-        activex = clientx;
-        activew = clientwidth;
-      } else {
-        draw_with_border(c, clientx, clientwidth, tabdata.groupactive[i] ? SchemeTabActiveGroup : SchemeTabInactive);
-      }
-	  }
-	  if (m->sel && !(m->sel->isfloating)) {
-  	  draw_with_border(m->sel, activex, activew, SchemeTabActiveWin);
-	  }
-		for (c = m->clients; c; c = c->next) {
-		  if (!ISVISIBLE(c) || !c->isfloating) continue;
-    	drw_setscheme(drw, scheme[m->sel == c ? SchemeSel : SchemeNorm]);
-    	drw_rect(drw, c->x, bh - 5, 4, 4, 0, 1);
+			tabdata->groupn++;
+			if (m->sel == c) { tabdata->groupactive = True; }
+			for (p = tabdata_root; p; p = p->next) {
+				if (tabdata != p && abs(tabdata->groupend - p->groupstart) < BARTABS_FUZZ_SIZE) {
+					tabdata->groupend = p->groupstart;
+				}
+				if (tabdata != p && abs(tabdata->groupstart - p->groupend) < BARTABS_FUZZ_SIZE) {
+					tabdata->groupstart = p->groupend;
+				}
+			}
 		}
 	}
-	
+
+	// Drawing code
 	drw_setscheme(drw, scheme[SchemeNorm]);
-	drw_rect(drw, x, bh - 1, m->ww - sw - x, 1, 0, 1);
+	drw_rect(drw, x, 0, m->ww - sw - x, bh, 1, 1);
+	for (c = m->clients; c; c = c->next) {
+		if (!ISVISIBLE(c) || c->isfloating) continue;
+		int clientwidth, clientx, indent = 0;
+		if (NULL == c->mon->lt[c->mon->sellt]->arrange) {
+			// TODO: e.g. in floating layout - just show all items as tabs
+			//tabdata->groupi--;
+		} else {
+			for (tabdata = tabdata_root; tabdata && tabdata->groupx != c->x && tabdata->next; tabdata = tabdata->next);
+			indent = MAX(x, tabdata->groupstart);
+			clientwidth = (
+				MIN(tabdata->groupend - indent, m->ww - sw - indent) /
+				(double) tabdata->groupn
+			);
+			clientx = indent + (clientwidth * tabdata->groupi);
+		}
+
+		int col = SchemeTabInactive;
+		if (m->sel == c)
+			col = SchemeSel;
+		else if (tabdata->groupactive)
+			col = SchemeTabActiveGroup;
+
+		draw_with_border(c, clientx, clientwidth, col);
+		tabdata->groupi++;
+	}
+
+	if (BARTABS_DRAW_FLOAT_SQUARES) {
+		for (c = m->clients; c; c = c->next) {
+			if (!ISVISIBLE(c) || !c->isfloating) continue;
+			drw_setscheme(drw, scheme[m->sel == c ? SchemeSel : SchemeNorm]);
+			drw_rect(drw, c->x, bh - 5, 4, 4, 0, 1);
+		}
+	}
+	if (BARTABS_DRAW_BOTTOM_BORDER) {
+		drw_setscheme(drw, scheme[SchemeNorm]);
+		drw_rect(drw, x, bh - 1, m->ww - sw - x, 1, 0, 1);
+	}
+
+	while (tabdata_root != NULL) {
+		tabdata = tabdata_root;
+		tabdata_root = tabdata_root->next;
+		free(tabdata);
+	}
 }
 
 
