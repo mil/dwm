@@ -186,7 +186,9 @@ static Monitor *dirtomon(int dir);
 static void drawbar(Monitor *m);
 static void drawbars(void);
 static void drawtaggrid(Monitor *m, int *x_pos, unsigned int occ);
-static void drawbartabs(Monitor *m, int x, int sw);
+static void drawbartabgroups(Monitor *m, int x, int sw);
+static void drawbartab(Monitor *m, Client *c, int x, int w, int scheme_n);
+static void drawbartaboptionals(Monitor *m, Client *c, int x, int w, int scheme_n);
 static void enternotify(XEvent *e);
 static void expose(XEvent *e);
 static Client *findbefore(Client *c);
@@ -1004,8 +1006,7 @@ drawbar(Monitor *m)
 	w = blw = TEXTW(m->ltsymbol);
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
-
-	drawbartabs(m, x, sw);
+	drawbartabgroups(m, x, sw);
 	drw_map(drw, m->barwin, 0, 0, m->ww, bh);
 }
 
@@ -1018,109 +1019,147 @@ drawbars(void)
 		drawbar(m);
 }
 
+#define BARTABS_BORDERS 1         // 0 = disable, 1 = enable
+#define BARTABS_BOTTOMBORDER 1    // 0 = disable, 1 = enable
+#define BARTABS_FUZZPX 12         // # pixels cutoff between bartab groups to merge
+#define BARTABS_FLOATINDICATOR 1  // 0 = disable, 1 = enable
+#define BARTABS_FLOATPX 5         // # pixels for float box indicator
+#define BARTABS_TAGSINDICATOR 1   // 0 = disable, 1 = enable when >1 client or view tag, 2 = enable always
+#define BARTABS_TAGSPX 5          // # pixels for tag grid boxes
+#define BARTABS_TAGSROWS 2        // # rows in tag grid
+#define BARTABS_INDICATORSPADPX 2 // # pixels from l/r to pad float/tags indicators
 
-void draw_with_border(Client *c, int x, int w, int scheme_n) {
-  if (c) {
-  	drw_setscheme(drw, scheme[scheme_n]); 
-  	drw_text(drw, x, 0, w, bh, lrpad / 2, c->name, 0);
-    drw_rect(drw, x, 0, 1, bh, 1, 0);
-    drw_rect(drw, x + w, 0, 1, bh, 1, 0);
-  }
-}
-
-// TODO: move this up to top
-#define BARTABS_FUZZ_SIZE 12
-#define BARTABS_DRAW_FLOAT_SQUARES 1
-#define BARTABS_DRAW_BOTTOM_BORDER 1
-struct TabData {
-	int groupx;
-	int groupn;
-	int groupi;
-	int groupactive;
-	int groupstart;
-	int groupend;
-	struct TabData * next;
+struct TabGroup {
+	int x;
+	int n;
+	int i;
+	int active;
+	int start;
+	int end;
+	struct TabGroup * next;
 };
 
-void drawbartabs(Monitor *m, int x, int sw) {
+void drawbartabgroups(Monitor *m, int x, int sw) {
 	Client *c;
-	struct TabData *tabdata_root = NULL, *tabdata, *f;
+	struct TabGroup *tg_head = NULL, *tg, *tg2;
+	int tabcolor, tabwidth, tabx;
 
-	for (c = m->clients; c; c = c->next) {
-		if (ISVISIBLE(c) && !c->isfloating) {
-			tabdata = tabdata_root;
-			for (tabdata = tabdata_root; tabdata && tabdata->groupx != c->x && tabdata->next; tabdata = tabdata->next);
-			if (!tabdata || (tabdata && tabdata->groupx != c->x)) {
-				f = calloc(1, sizeof(struct TabData));
-				f->groupstart = f->groupx = c->x;
-				f->groupend = c->x + c->w;
-				if (!tabdata) { tabdata_root = f; }
-				if (tabdata && tabdata->groupx != c->x) { tabdata->next = f; }
-				tabdata = f;
-
-				for (f = tabdata_root; f; f = f->next) {
-					if (tabdata != f && abs(tabdata->groupend - f->groupx) < BARTABS_FUZZ_SIZE) {
-					  f->groupstart = (f->groupx + tabdata->groupend) / 2.0;
-					  tabdata->groupend = f->groupstart;
-					}
-					if (tabdata != f && abs(tabdata->groupstart - f->groupend) < BARTABS_FUZZ_SIZE) {
-					  f->groupend = (f->groupend + tabdata->groupstart) / 2.0;
-					  tabdata->groupstart = f->groupend;
-					}
+	// Calculate groups
+	if (NULL != m->lt[m->sellt]->arrange) {
+		for (c = m->clients; c; c = c->next) {
+			if (ISVISIBLE(c) && !c->isfloating) {
+				for (tg = tg_head; tg && tg->x != c->x - m->mx && tg->next; tg = tg->next);
+				if (!tg || (tg && tg->x != c->x - m->mx)) {
+					tg2 = calloc(1, sizeof(struct TabGroup));
+					tg2->start = tg2->end = tg2->x = c->x - m->mx;
+					tg2->end += c->w;
+					if (tg) { tg->next = tg2; } else { tg_head = tg2; }
 				}
-
 			}
-			tabdata->groupn++;
-			if (m->sel == c) { tabdata->groupactive = True; }
+		}
+	}
+	if (!tg_head) {
+		tg_head = calloc(1, sizeof(struct TabGroup));
+		tg_head->end = m->ww;
+	}
+	for (c = m->clients; c; c = c->next) {
+		if (!ISVISIBLE(c) || (c->isfloating && tg_head->next != NULL)) continue;
+		for (tg = tg_head; tg && tg->x != c->x - m->mx && tg->next; tg = tg->next);
+		if (m->sel == c) { tg->active = True; }
+		tg->n++;
+	}
+	for (tg = tg_head; tg; tg = tg->next) {
+		if ((m->mx + m->mw) - tg->end < BARTABS_FUZZPX)
+			tg->end = m->mx + m->mw;
+		else
+		for (tg2 = tg_head; tg2; tg2 = tg2->next) {
+			if (tg != tg2 && abs(tg->end - tg2->start) < BARTABS_FUZZPX) {
+			  tg->end = (tg->end + tg2->start) / 2.0;
+			  tg2->start = tg->end;
+			}
 		}
 	}
 
-	// Drawing code
+	// Draw
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, x, 0, m->ww - sw - x, bh, 1, 1);
 	for (c = m->clients; c; c = c->next) {
-		if (!ISVISIBLE(c) || c->isfloating) continue;
-		int clientwidth, clientx, indent = 0;
-		if (NULL == c->mon->lt[c->mon->sellt]->arrange) {
-			// TODO: e.g. in floating layout - just show all items as tabs
-			//tabdata->groupi--;
-		} else {
-			for (tabdata = tabdata_root; tabdata && tabdata->groupx != c->x && tabdata->next; tabdata = tabdata->next);
-			indent = MAX(x, tabdata->groupstart);
-			clientwidth = (
-				MIN(tabdata->groupend - indent, m->ww - sw - indent) /
-				(double) tabdata->groupn
-			);
-			clientx = indent + (clientwidth * tabdata->groupi);
-		}
-
-		int col = SchemeTabInactive;
-		if (m->sel == c)
-			col = SchemeSel;
-		else if (tabdata->groupactive)
-			col = SchemeTabActiveGroup;
-
-		draw_with_border(c, clientx, clientwidth, col);
-		tabdata->groupi++;
+		if (!ISVISIBLE(c) || (c->isfloating && tg_head->next != NULL)) continue;
+		for (tg = tg_head; tg && tg->x != c->x - m->mx && tg->next; tg = tg->next);
+		tabwidth = (MIN(tg->end, m->ww - sw) - MAX(x, tg->start)) / (double) tg->n;
+		tabx = MAX(x, tg->start) + (tabwidth * tg->i);
+		drawbartab(m, c, tabx, tabwidth, tg->active);
+		drawbartaboptionals(m, c, tabx, tabwidth, tg->active);
+		tg->i++;
 	}
-
-	if (BARTABS_DRAW_FLOAT_SQUARES) {
-		for (c = m->clients; c; c = c->next) {
-			if (!ISVISIBLE(c) || !c->isfloating) continue;
-			drw_setscheme(drw, scheme[m->sel == c ? SchemeSel : SchemeNorm]);
-			drw_rect(drw, c->x, bh - 5, 4, 4, 0, 1);
-		}
-	}
-	if (BARTABS_DRAW_BOTTOM_BORDER) {
+	if (BARTABS_BOTTOMBORDER) {
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		drw_rect(drw, x, bh - 1, m->ww - sw - x, 1, 0, 1);
 	}
-	while (tabdata_root != NULL) {
-		tabdata = tabdata_root;
-		tabdata_root = tabdata_root->next;
-		free(tabdata);
-	}
+	while (tg_head != NULL) { tg = tg_head; tg_head = tg_head->next; free(tg); }
 }
+
+
+void drawbartab(Monitor *m, Client *c, int x, int w, int tabgroup_active) {
+  if (!c) return;
+
+	drw_setscheme(drw, scheme[
+		m->sel == c ? 
+		SchemeSel : (tabgroup_active ? SchemeTabActiveGroup : SchemeTabInactive)
+	]);
+	drw_text(drw, x, 0, w, bh, lrpad / 2, c->name, 0);
+}
+
+void drawbartaboptionals(Monitor *m, Client *c, int x, int w, int tabgroup_active) {
+  if (!c) return;
+
+  fprintf(stderr, "Drawing %s on tags: %d\n", c->name, c->tags);
+
+	if (BARTABS_BORDERS) {
+    drw_rect(drw, x, 0, 1, bh, 1, 0);
+    drw_rect(drw, x + w, 0, 1, bh, 1, 0);
+	}
+
+	if (BARTABS_FLOATINDICATOR && c->isfloating) {
+    drw_rect(drw, x + BARTABS_INDICATORSPADPX, 
+    	2, BARTABS_FLOATPX, BARTABS_FLOATPX, 0, 0);
+  }
+
+  if (BARTABS_TAGSINDICATOR) {
+  	int i, draw_grid = 1;
+
+		if (BARTABS_TAGSINDICATOR == 1) {
+	  	int nclienttags = 0, nviewtags = 0;
+	  	for (i = 0; i < LENGTH(tags); i++) { 
+	  		if ((m->tagset[m->seltags] >> i) & 1) { nviewtags++; }
+	  		if ((c->tags >> i) & 1) { nclienttags++; }
+	  	}
+	  	draw_grid = nclienttags > 1 || nviewtags > 1;
+		}
+		if (draw_grid) {
+	  	for (i = 0; i < LENGTH(tags); i++) {
+		    drw_rect(
+		    	drw, 
+		    	(
+			    	x + w 
+			    	- BARTABS_INDICATORSPADPX
+			    	- ((LENGTH(tags) / BARTABS_TAGSROWS) * BARTABS_TAGSPX)  
+			    	- (i  % (LENGTH(tags)/BARTABS_TAGSROWS))
+						+ ((i % (LENGTH(tags) / BARTABS_TAGSROWS)) * BARTABS_TAGSPX)
+					),
+					(
+			    	2 
+			    	+ ((i / (LENGTH(tags)/BARTABS_TAGSROWS)) * BARTABS_TAGSPX)
+			    	- ((i / (LENGTH(tags)/BARTABS_TAGSROWS)))
+			    ), 
+		    	BARTABS_TAGSPX, BARTABS_TAGSPX, (c->tags >> i) & 1, 0
+		  	);
+	  	}
+	  }
+  }
+}
+
+
 
 
 void drawtaggrid(Monitor *m, int *x_pos, unsigned int occ)
