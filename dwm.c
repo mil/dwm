@@ -1483,12 +1483,8 @@ keypress(XEvent *e)
 void
 killclient(const Arg *arg)
 {
-	Monitor *m;
-	int n;
-	for (n = 0, m = mons; m; m = m->next, n++) {
-		focus(m->sel);
-		restack(m);
-	}
+	focus(selmon->sel);
+	restack(selmon);
 
 	if (!selmon->sel)
 		return;
