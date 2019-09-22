@@ -19,8 +19,8 @@ static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 1;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
-static const char *fonts[]          = { "Terminus:size=9" };
-static const char dmenufont[]       = "Terminus:size=9";
+static const char *fonts[]          = { "Terminus:size=11" };
+static const char dmenufont[]       = "Terminus:size=11";
 static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
@@ -61,8 +61,18 @@ static const Rule rules[] = {
 	 */
 	/* class      instance    title       tags mask     isfloating   isterminal nowallow monitor */
 	{ "st",       NULL,       NULL,       0,            0,           1,         1,        -1 },
-	{ "dmenu",       NULL,       NULL,       0,            1,           0,         1,        -1 },
-	{ NULL,       NULL,       "dmenu",       0,            1,           0,         1,        -1 },
+
+	{ "st",       NULL, "mutt",     1 << 4,            0,           0,         0,        -1 },
+	{ "st",       NULL, "newsboat", 1 << 4,            0,           0,         0,        -1 },
+
+	{ "surf",       NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
+	{ "Surf",       NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
+	{ "Firefox",    NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
+	{ "firefox",    NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
+
+	{ "mpv",       NULL,      NULL,       1 << 5,      0,           0,         0,        -1 },
+	{ NULL,       NULL,       "mpv",     1 << 5,    0,           0,         0,        -1 },
+
 };
 
 /* layout(s) */
@@ -79,9 +89,9 @@ static const Layout layouts[] = {
 	{ "M",      monocle },
 	{ "D",      deck },
 	{ "G",      grid },
-	{ "C",      centeredmaster },
+	{ "CM",      centeredmaster },
 	{ "DD",     deckdouble },
-	{ "COL",     col }
+	{ "C",     col }
 };
 
 #define LTILE 0
@@ -95,11 +105,12 @@ static const Layout layouts[] = {
 
 /* key definitions */
 #define MODKEY Mod1Mask
+#define WINKEY Mod4Mask
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      comboview,           {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
 	{ MODKEY|ShiftMask,             KEY,      combotag,            {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
+	{ WINKEY,                       KEY,      toggletag,      {.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
@@ -142,27 +153,24 @@ static Key keys[] = {
 
 	{ MODKEY|ShiftMask,             XK_grave,  killclient,     {0} },
 
-	{ MODKEY,             					XK_n,      setlayout,      {.v = &layouts[LGRID]} },
+	{ MODKEY,             					XK_n,      setlayout,      {.v = &layouts[LFLOAT]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[LMONOCOLE]} },
 	{ MODKEY,                       XK_comma,  setlayout,      {.v = &layouts[LTILE]} },
-	{ MODKEY|ShiftMask,             XK_comma,  setlayout,      {.v = &layouts[LCOL]} },
 	{ MODKEY,                       XK_period,  setlayout,      {.v = &layouts[LDECK]} },
-	{ MODKEY|ShiftMask,             XK_period,  setlayout,      {.v = &layouts[LDECKDOUBLE]} },
-	{ MODKEY,                       XK_slash, setlayout,      {.v = &layouts[LCENTEREDMASTER]} },
-	{ MODKEY|ShiftMask,             XK_slash, setlayout,      {.v = &layouts[LFLOAT]} },
+	{ MODKEY|ShiftMask,             XK_period,  setlayout,      {.v = &layouts[LCOL]} },
+	{ MODKEY,                       XK_slash,  setlayout,      {.v = &layouts[LDECKDOUBLE]} },
+
+	/*{ MODKEY,                       XK_slash, setlayout,      {.v = &layouts[LCENTEREDMASTER]} }, */
+	{ MODKEY|ShiftMask,             XK_slash, setlayout,      {.v = &layouts[LCENTEREDMASTER]} },
 
 	{ MODKEY,                       XK_f,  togglefloating, {0} },
 	{ MODKEY|ShiftMask,             XK_f,  unfloatvisible, {0} },
 
-	{ MODKEY,                       XK_t,      comboview,           {.ui = ~0 } },
-	{ MODKEY|ShiftMask,             XK_t,      combotag,            {.ui = ~0 } },
-
-
   // Todo: put on []
-	//{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
-	//{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
-	//{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
-	//{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
+	{ MODKEY,                       XK_bracketleft,  focusmon,       {.i = -1 } },
+	{ MODKEY,                       XK_bracketright,  focusmon,       {.i = +1 } },
+	{ MODKEY|ShiftMask,             XK_bracketleft,  tagmon,         {.i = -1 } },
+	{ MODKEY|ShiftMask,             XK_bracketright, tagmon,         {.i = +1 } },
 
 
 	TAGKEYS(                        XK_1,                      0)
@@ -172,6 +180,11 @@ static Key keys[] = {
 	TAGKEYS(                        XK_q,                      3)
 	TAGKEYS(                        XK_w,                      4)
 	TAGKEYS(                        XK_e,                      5)
+
+	{ MODKEY,                       XK_r,      comboview,           {.ui = ~0 } },
+	{ MODKEY|ShiftMask,             XK_r,      combotag,            {.ui = ~0 } },
+
+
 	//TAGKEYS(                        XK_w,                      6)
 	//TAGKEYS(                        XK_e,                      7)
 	//TAGKEYS(                        XK_r,                      8)
