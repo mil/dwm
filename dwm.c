@@ -867,31 +867,61 @@ destroynotify(XEvent *e)
 
 void
 deck(Monitor *m) {
-	unsigned int i, n, h, mw, my, ns;
-	Client *c;
+	//unsigned int i, n, h, mw, my, ns;
+	//Client *c;
+	//for(n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+	//if(n == 0)
+	//	return;
+	//if(n == 1){
+	//	c = nexttiled(m->clients);
+	//	resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
+	//	return;
+	//}
+	//if(n > m->nmaster) {
+	//	mw = m->nmaster ? m->ww * m->mfact : 0;
+	//	ns = m->nmaster > 0 ? 2 : 1;
+	//} else {
+	//	mw = m->ww;
+	//	ns = 1;
+	//}
 
-	for(n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
-	if(n == 0)
+
+	unsigned int i, n, h, mw, my, ty, ns;
+	float mfacts = 0, sfacts = 0;
+	Client *c;
+	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++) {
+		if (n < m->nmaster)
+			mfacts += c->cfact;
+		else
+			sfacts += c->cfact;
+	}
+	if (n == 0)
 		return;
 	if(n == 1){
 		c = nexttiled(m->clients);
 		resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
 		return;
 	}
-
-	if(n > m->nmaster) {
+	if (n > m->nmaster){
 		mw = m->nmaster ? m->ww * m->mfact : 0;
 		ns = m->nmaster > 0 ? 2 : 1;
-		//snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n - m->nmaster);
-	} else {
-		mw = m->ww;
+	}
+	else{
+		mw = m->ww - m->gappx;
 		ns = 1;
 	}
+
+
 	for(i = 0, my = m->gappx, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
 		if(i < m->nmaster) {
-			h = (m->wh - my) / (MIN(n, m->nmaster) - i) - m->gappx;
-			resize(c, m->wx + m->gappx, m->wy + my, mw - (2*c->bw) - m->gappx*(5-ns)/2, h - (2*c->bw), False);
+			//h = (m->wh - my) / (MIN(n, m->nmaster) - i) - m->gappx;
+			//resize(c, m->wx + m->gappx, m->wy + my, mw - (2*c->bw) - m->gappx*(5-ns)/2, h - (2*c->bw), False);
+			//my += HEIGHT(c) + m->gappx;
+
+			h = (m->wh - my) * (c->cfact / mfacts) - m->gappx;
+			resize(c, m->wx + m->gappx, m->wy + my, mw - 2*c->bw - m->gappx*(5-ns)/2, h - 2*c->bw, 0);
 			my += HEIGHT(c) + m->gappx;
+			mfacts -= c->cfact;
 		}
 		else
 			resize(c, m->wx + mw + m->gappx/ns, m->wy + m->gappx, m->ww - mw - (2*c->bw) - m->gappx*(5-ns)/2, m->wh - (2*c->bw) - 2*m->gappx, False);
@@ -1112,8 +1142,6 @@ void drawbartab(Monitor *m, Client *c, int x, int w, int tabgroup_active) {
 
 void drawbartaboptionals(Monitor *m, Client *c, int x, int w, int tabgroup_active) {
   if (!c) return;
-
-  fprintf(stderr, "Drawing %s on tags: %d\n", c->name, c->tags);
 
 	if (BARTABS_BORDERS) {
     drw_rect(drw, x, 0, 1, bh, 1, 0);
@@ -3193,6 +3221,7 @@ void setcfact(const Arg *arg) {
 	if(!arg || !c || !selmon->lt[selmon->sellt]->arrange)
 		return;
 	f = arg->f + c->cfact;
+	fprintf(stderr, "new Cfact %f\n", f);
 	if(arg->f == 0.0)
 		f = 1.0;
 	else if(f < 0.25 || f > 4.0)
