@@ -70,6 +70,9 @@ static const Rule rules[] = {
 	{ "Firefox",    NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
 	{ "firefox",    NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
 
+	{ "DBeaver",       NULL,      NULL,       1 << 2,      0,           0,         0,        -1 },
+	{ NULL,       NULL,      "DBeaver",       1 << 2,      0,           0,         0,        -1 },
+
 	{ "mpv",       NULL,      NULL,       1 << 5,      0,           0,         0,        -1 },
 	{ NULL,       NULL,       "mpv",     1 << 5,    0,           0,         0,        -1 },
 
