@@ -138,6 +138,8 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_j,      pushdown,    {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_k,      pushup,    {.i = -1 } },
 
+	{ MODKEY,                       XK_g,      mastertagcycle,    {.i = -1 } },
+
 	{ MODKEY,                       XK_space,  zoom,         {0} },
 	{ MODKEY,                       XK_semicolon, switchcol,    {0} },
 
