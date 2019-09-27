@@ -277,6 +277,7 @@ static void keyrelease(XEvent *e);
 static void combotag(const Arg *arg);
 static void comboview(const Arg *arg);
 
+static void mastertagcycle(const Arg *arg);
 
 /* variables */
 static Client *prevzoom = NULL;
@@ -3302,3 +3303,48 @@ col(Monitor *m) {
 	}
 }
 
+
+void
+mastertagcycle(const Arg *arg) {
+	Client *c, ** arr;
+	unsigned int oldtags = selmon->clients->tags;
+	unsigned int *newtags = NULL;
+	unsigned int siz = 0;
+	unsigned int i = 0;
+	unsigned int nmaster = 0;
+
+	if(!selmon->sel || (selmon->sel->isfloating && !arg->f)) return;
+
+	for (c = selmon->clients; c; c = c->next) {
+		if (!ISVISIBLE(c)) continue;
+		siz++;
+	}
+
+	arr = malloc(sizeof(Client*) * siz);
+	for (c = selmon->clients; c; c = c->next) {
+		if (!ISVISIBLE(c)) continue;
+		if (!newtags && c->tags != oldtags) { newtags = &(c->tags); }
+		if (!newtags || (newtags && *newtags != c->tags)) {
+			arr[i] = c;
+			i++;
+		}
+	}
+	for (c = selmon->clients; c; c = c->next) {
+		if (!ISVISIBLE(c)) continue;
+		if (newtags && *newtags == c->tags) {
+			arr[i] = c;
+			i++;
+			nmaster++;
+		}
+	}
+	if (arr[siz-1]->tags != oldtags) {
+		selmon->nmaster = nmaster;
+		for (i = 0; i < siz; i++) {
+			detach(arr[i]);
+			attach(arr[i]);
+			arrange(arr[i]->mon);
+		}
+		focus(arr[siz - 1]);
+	}
+	free(arr);
+}
