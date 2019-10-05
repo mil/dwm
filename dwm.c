@@ -932,7 +932,7 @@ deck(Monitor *m) {
 
 void
 deckdouble(Monitor *m) {
-	unsigned int i, n, h, mw, my, ns;
+	unsigned int i, n, h, mw, ns;
 	Client *c;
 
 	for(n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
@@ -952,11 +952,9 @@ deckdouble(Monitor *m) {
 		mw = m->ww;
 		ns = 1;
 	}
-	for(i = 0, my = m->gappx, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
-		if(i < m->nmaster) {
-			resize(c, m->wx + m->gappx, m->wy + my, mw - (2*c->bw) - m->gappx*(5-ns)/2, m->wh - (2*c->bw) - 2*m->gappx, False);
-			my += HEIGHT(c) + m->gappx;
-		}
+	for(i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
+		if(i < m->nmaster)
+			resize(c, m->wx + m->gappx, m->wy + m->gappx, mw - (2*c->bw) - m->gappx*(5-ns)/2, m->wh - (2*c->bw) - 2*m->gappx, False);
 		else
 			resize(c, m->wx + mw + m->gappx/ns, m->wy + m->gappx, m->ww - mw - (2*c->bw) - m->gappx*(5-ns)/2, m->wh - (2*c->bw) - 2*m->gappx, False);
 }
