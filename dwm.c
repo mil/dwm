@@ -437,7 +437,9 @@ applyrules(Client *c)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
-	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
+	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (
+		selmon->sel ? selmon->sel->tags : c->mon->tagset[c->mon->seltags]
+	);
 }
 
 int
