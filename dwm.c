@@ -3340,8 +3340,8 @@ mastertagcycle(const Arg *arg) {
 		for (i = 0; i < siz; i++) {
 			detach(arr[i]);
 			attach(arr[i]);
-			arrange(arr[i]->mon);
 		}
+		arrange(selmon);
 		focus(arr[siz - 1]);
 	}
 	free(arr);
