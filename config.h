@@ -87,14 +87,14 @@ static const int resizehints = 0;    /* 1 means respect size hints in tiled resi
 #include "unfloat.c"
 static const Layout layouts[] = {
 	/* symbol     arrange function */
-	{ "T",      tile },    /* first entry is default */
-	{ "F",      NULL },    /* no layout function means floating behavior */
-	{ "M",      monocle },
-	{ "D",      deck },
-	{ "G",      grid },
-	{ "CM",      centeredmaster },
-	{ "DD",     deckdouble },
-	{ "C",     col }
+	{ "T",  tile },    /* first entry is default */
+	{ "F",  NULL },    /* no layout function means floating behavior */
+	{ "M",  monocle },
+	{ "D",  deck },
+	{ "G",  grid },
+	{ "CM", centeredmaster },
+	{ "B",  deckdouble },
+	{ "C",  col }
 };
 
 #define LTILE 0
