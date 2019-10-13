@@ -152,6 +152,17 @@ typedef struct {
 	int monitor;
 } Rule;
 
+typedef struct TabGroup TabGroup;
+struct TabGroup {
+	int x;
+	int n;
+	int i;
+	int active;
+	int start;
+	int end;
+	struct TabGroup * next;
+};
+
 /* function declarations */
 
 // Swallow
@@ -188,8 +199,8 @@ static void drawbar(Monitor *m);
 static void drawbars(void);
 static void drawtaggrid(Monitor *m, int *x_pos, unsigned int occ);
 static void drawbartabgroups(Monitor *m, int x, int sw);
-static void drawbartab(Monitor *m, Client *c, int x, int w, int scheme_n);
-static void drawbartaboptionals(Monitor *m, Client *c, int x, int w, int scheme_n);
+static void drawbartab(Monitor *m, Client *c, int x, int w, int tabgroup_active);
+static void drawbartaboptionals(Monitor *m, Client *c, int x, int w, int tabgroup_active);
 static void enternotify(XEvent *e);
 static void expose(XEvent *e);
 static Client *findbefore(Client *c);
@@ -1051,38 +1062,28 @@ drawbars(void)
 		drawbar(m);
 }
 
-#define BARTABS_BORDERS 1         // 0 = disable, 1 = enable
-#define BARTABS_BOTTOMBORDER 1    // 0 = disable, 1 = enable
-#define BARTABS_FUZZPX 12         // # pixels cutoff between bartab groups to merge
-#define BARTABS_FLOATINDICATOR 1  // 0 = disable, 1 = enable
-#define BARTABS_FLOATPX 5         // # pixels for float box indicator
-#define BARTABS_TAGSINDICATOR 1   // 0 = disable, 1 = enable when >1 client or view tag, 2 = enable always
-#define BARTABS_TAGSPX 5          // # pixels for tag grid boxes
-#define BARTABS_TAGSROWS 2        // # rows in tag grid
-#define BARTABS_INDICATORSPADPX 2 // # pixels from l/r to pad float/tags indicators
-
-struct TabGroup {
-	int x;
-	int n;
-	int i;
-	int active;
-	int start;
-	int end;
-	struct TabGroup * next;
-};
+#define BARTABGROUPS_BORDERS 1         // 0 = disable, 1 = enable
+#define BARTABGROUPS_BOTTOMBORDER 1    // 0 = disable, 1 = enable
+#define BARTABGROUPS_FUZZPX 12         // # pixels cutoff between bartab groups to merge
+#define BARTABGROUPS_FLOATINDICATOR 1  // 0 = disable, 1 = enable
+#define BARTABGROUPS_FLOATPX 5         // # pixels for float box indicator
+#define BARTABGROUPS_TAGSINDICATOR 1   // 0 = disable, 1 = enable when >1 client or view tag, 2 = enable always
+#define BARTABGROUPS_TAGSPX 5          // # pixels for tag grid boxes
+#define BARTABGROUPS_TAGSROWS 2        // # rows in tag grid
+#define BARTABGROUPS_INDICATORSPADPX 2 // # pixels from l/r to pad float/tags indicators
 
 void drawbartabgroups(Monitor *m, int x, int sw) {
 	Client *c;
-	struct TabGroup *tg_head = NULL, *tg, *tg2;
-	int tabcolor, tabwidth, tabx;
+	TabGroup *tg_head = NULL, *tg, *tg2;
+	int tabcolor, tabwidth, tabx, tabgroupwidth;
 
-	// Calculate groups
+	// Calculate
 	if (NULL != m->lt[m->sellt]->arrange) {
 		for (c = m->clients; c; c = c->next) {
 			if (ISVISIBLE(c) && !c->isfloating) {
 				for (tg = tg_head; tg && tg->x != c->x - m->mx && tg->next; tg = tg->next);
 				if (!tg || (tg && tg->x != c->x - m->mx)) {
-					tg2 = calloc(1, sizeof(struct TabGroup));
+					tg2 = calloc(1, sizeof(TabGroup));
 					tg2->start = tg2->end = tg2->x = c->x - m->mx;
 					tg2->end += c->w;
 					if (tg) { tg->next = tg2; } else { tg_head = tg2; }
@@ -1091,7 +1092,7 @@ void drawbartabgroups(Monitor *m, int x, int sw) {
 		}
 	}
 	if (!tg_head) {
-		tg_head = calloc(1, sizeof(struct TabGroup));
+		tg_head = calloc(1, sizeof(TabGroup));
 		tg_head->end = m->ww;
 	}
 	for (c = m->clients; c; c = c->next) {
@@ -1101,13 +1102,14 @@ void drawbartabgroups(Monitor *m, int x, int sw) {
 		tg->n++;
 	}
 	for (tg = tg_head; tg; tg = tg->next) {
-		if ((m->mx + m->mw) - tg->end < BARTABS_FUZZPX)
-			tg->end = m->mx + m->mw;
-		else
-		for (tg2 = tg_head; tg2; tg2 = tg2->next) {
-			if (tg != tg2 && abs(tg->end - tg2->start) < BARTABS_FUZZPX) {
-			  tg->end = (tg->end + tg2->start) / 2.0;
-			  tg2->start = tg->end;
+		if ((m->mx + m->ww) - tg->end < BARTABGROUPS_FUZZPX) {
+			tg->end = m->mx + m->ww;
+		} else {
+			for (tg2 = tg_head; tg2; tg2 = tg2->next) {
+				if (tg != tg2 && abs(tg->end - tg2->start) < BARTABGROUPS_FUZZPX) {
+				  tg->end = (tg->end + tg2->start) / 2.0;
+				  tg2->start = tg->end;
+				}
 			}
 		}
 	}
@@ -1118,23 +1120,25 @@ void drawbartabgroups(Monitor *m, int x, int sw) {
 	for (c = m->clients; c; c = c->next) {
 		if (!ISVISIBLE(c) || (c->isfloating && tg_head->next != NULL)) continue;
 		for (tg = tg_head; tg && tg->x != c->x - m->mx && tg->next; tg = tg->next);
-		tabwidth = (MIN(tg->end, m->ww - sw) - MAX(x, tg->start)) / (double) tg->n;
+		tabgroupwidth = (MIN(tg->end, m->ww - sw) - MAX(x, tg->start));
+		tabwidth = (tabgroupwidth / tg->n);
 		tabx = MAX(x, tg->start) + (tabwidth * tg->i);
+		tabwidth += (tg->n == tg->i + 1 ?  tabgroupwidth % tg->n : 0);
 		drawbartab(m, c, tabx, tabwidth, tg->active);
 		drawbartaboptionals(m, c, tabx, tabwidth, tg->active);
 		tg->i++;
 	}
-	if (BARTABS_BOTTOMBORDER) {
+	if (BARTABGROUPS_BOTTOMBORDER) {
 		drw_setscheme(drw, scheme[SchemeNorm]);
-		drw_rect(drw, x, bh - 1, m->ww - sw - x, 1, 0, 1);
+		drw_rect(drw, x, bh - 1, m->ww - sw - x + 1, 1, 1, 1);
 	}
+
 	while (tg_head != NULL) { tg = tg_head; tg_head = tg_head->next; free(tg); }
 }
 
 
 void drawbartab(Monitor *m, Client *c, int x, int w, int tabgroup_active) {
-  if (!c) return;
-
+	if (!c) return;
 	drw_setscheme(drw, scheme[
 		m->sel == c ? 
 		SchemeSel : (tabgroup_active ? SchemeTabActiveGroup : SchemeTabInactive)
@@ -1143,50 +1147,52 @@ void drawbartab(Monitor *m, Client *c, int x, int w, int tabgroup_active) {
 }
 
 void drawbartaboptionals(Monitor *m, Client *c, int x, int w, int tabgroup_active) {
-  if (!c) return;
+	int i, draw_grid, nclienttags, nviewtags;
 
-	if (BARTABS_BORDERS) {
-    drw_rect(drw, x, 0, 1, bh, 1, 0);
-    drw_rect(drw, x + w, 0, 1, bh, 1, 0);
+	if (!c) return;
+
+	// Box indicator for floating window flag
+	if (BARTABGROUPS_FLOATINDICATOR && c->isfloating) {
+		drw_rect(drw, x + BARTABGROUPS_INDICATORSPADPX,
+			2, BARTABGROUPS_FLOATPX, BARTABGROUPS_FLOATPX, 0, 0);
 	}
 
-	if (BARTABS_FLOATINDICATOR && c->isfloating) {
-    drw_rect(drw, x + BARTABS_INDICATORSPADPX, 
-    	2, BARTABS_FLOATPX, BARTABS_FLOATPX, 0, 0);
-  }
-
-  if (BARTABS_TAGSINDICATOR) {
-  	int i, draw_grid = 1;
-
-		if (BARTABS_TAGSINDICATOR == 1) {
-	  	int nclienttags = 0, nviewtags = 0;
-	  	for (i = 0; i < LENGTH(tags); i++) { 
-	  		if ((m->tagset[m->seltags] >> i) & 1) { nviewtags++; }
-	  		if ((c->tags >> i) & 1) { nclienttags++; }
-	  	}
-	  	draw_grid = nclienttags > 1 || nviewtags > 1;
+	// Grid indicator
+	draw_grid = BARTABGROUPS_TAGSINDICATOR;
+	if (BARTABGROUPS_TAGSINDICATOR == 1) {
+		nclienttags = 0;
+		nviewtags = 0;
+		for (i = 0; i < LENGTH(tags); i++) {
+			if ((m->tagset[m->seltags] >> i) & 1) { nviewtags++; }
+			if ((c->tags >> i) & 1) { nclienttags++; }
 		}
-		if (draw_grid) {
-	  	for (i = 0; i < LENGTH(tags); i++) {
-		    drw_rect(
-		    	drw, 
-		    	(
-			    	x + w 
-			    	- BARTABS_INDICATORSPADPX
-			    	- ((LENGTH(tags) / BARTABS_TAGSROWS) * BARTABS_TAGSPX)  
-			    	- (i  % (LENGTH(tags)/BARTABS_TAGSROWS))
-						+ ((i % (LENGTH(tags) / BARTABS_TAGSROWS)) * BARTABS_TAGSPX)
-					),
-					(
-			    	2 
-			    	+ ((i / (LENGTH(tags)/BARTABS_TAGSROWS)) * BARTABS_TAGSPX)
-			    	- ((i / (LENGTH(tags)/BARTABS_TAGSROWS)))
-			    ), 
-		    	BARTABS_TAGSPX, BARTABS_TAGSPX, (c->tags >> i) & 1, 0
-		  	);
-	  	}
-	  }
-  }
+		draw_grid = nclienttags > 1 || nviewtags > 1;
+	}
+	if (draw_grid) {
+		for (i = 0; i < LENGTH(tags); i++) {
+			drw_rect(drw, (
+					x + w
+					- BARTABGROUPS_INDICATORSPADPX
+					- ((LENGTH(tags) / BARTABGROUPS_TAGSROWS) * BARTABGROUPS_TAGSPX)
+					- (i % (LENGTH(tags)/BARTABGROUPS_TAGSROWS))
+					+ ((i % (LENGTH(tags) / BARTABGROUPS_TAGSROWS)) * BARTABGROUPS_TAGSPX)
+				),
+				(
+					BARTABGROUPS_INDICATORSPADPX
+					+ ((i / (LENGTH(tags)/BARTABGROUPS_TAGSROWS)) * BARTABGROUPS_TAGSPX)
+					- ((i / (LENGTH(tags)/BARTABGROUPS_TAGSROWS)))
+				),
+				BARTABGROUPS_TAGSPX, BARTABGROUPS_TAGSPX, (c->tags >> i) & 1, 0
+			);
+		}
+	}
+
+	// Borders between tabs
+	if (BARTABGROUPS_BORDERS) {
+		XSetForeground(drw->dpy, drw->gc, drw->scheme[ColBorder].pixel);
+		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, 0, 1, bh);
+		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x + w, 0, 1, bh);
+	}
 }
 
 

@@ -40,12 +40,8 @@ static const char *colors[][5]      = {
 	[SchemeNorm] = { col_gray3, col_gray1, col_lgray },
 	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan},
 
-  [SchemeTabInactive] = { col_black, col_mgray, col_blue},
-	//[SchemeTabActiveWin]  = { col_gray4, col_cyan,  col_cyan},
-	//[SchemeTabActiveGroup] = { col_gray3, col_gray1, col_lgray },
-
-  [SchemeTabActiveGroup] = { col_dgray, col_lgray, col_blue},
-  [SchemeTabActiveWin] = { col_lblue, col_blue, col_blue},
+  [SchemeTabInactive] = { col_black, col_mgray, col_black},
+  [SchemeTabActiveGroup] = { col_dgray, col_lgray, col_black}
 };
 static const int focusonwheel       = 0;
 static const unsigned int gappx     = 5;        /* gap pixel between windows */
