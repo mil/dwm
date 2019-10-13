@@ -74,6 +74,7 @@ static const Rule rules[] = {
 	{ NULL,       NULL,      "DBeaver",       1 << 2,      0,           0,         0,        -1 },
 
 	{ "mpv",       NULL,      NULL,       1 << 5,      0,           0,         0,        -1 },
+	{ NULL,       NULL,      "pianobar",       1 << 5,      0,           0,         0,        -1 },
 	{ NULL,       NULL,       "mpv",     1 << 5,    0,           0,         0,        -1 },
 
 };
