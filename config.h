@@ -155,6 +155,7 @@ static Key keys[] = {
 
 	{ MODKEY|ShiftMask,             XK_grave,  killclient,     {0} },
 
+	{ MODKEY,             					XK_apostrophe,      setlayout,      {.v = &layouts[LGRID]} },
 	{ MODKEY,             					XK_n,      setlayout,      {.v = &layouts[LFLOAT]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[LMONOCOLE]} },
 	{ MODKEY,                       XK_comma,  setlayout,      {.v = &layouts[LTILE]} },
