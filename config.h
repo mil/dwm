@@ -184,9 +184,8 @@ static Key keys[] = {
 	TAGKEYS(                        XK_w,                      4)
 	TAGKEYS(                        XK_e,                      5)
 
-	{ MODKEY,                       XK_r,      comboview,           {.ui = ~0 } },
-	{ MODKEY|ShiftMask,             XK_r,      combotag,            {.ui = ~0 } },
-
+	//{ MODKEY,                       XK_r,      comboview,           {.ui = ~0 } },
+	//{ MODKEY|ShiftMask,             XK_r,      combotag,            {.ui = ~0 } },
 
 	//TAGKEYS(                        XK_w,                      6)
 	//TAGKEYS(                        XK_e,                      7)
