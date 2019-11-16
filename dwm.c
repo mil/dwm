@@ -1129,8 +1129,8 @@ void drawbartabgroups(Monitor *m, int x, int sw) {
 		tg->i++;
 	}
 	if (BARTABGROUPS_BOTTOMBORDER) {
-		drw_setscheme(drw, scheme[SchemeNorm]);
-		drw_rect(drw, x, bh - 1, m->ww - sw - x + 1, 1, 1, 1);
+		drw_setscheme(drw, scheme[SchemeTabActiveGroup]);
+		drw_rect(drw, 0, bh - 1, m->ww, 1, 1, 0);
 	}
 
 	while (tg_head != NULL) { tg = tg_head; tg_head = tg_head->next; free(tg); }
@@ -1231,11 +1231,11 @@ void drawtaggrid(Monitor *m, int *x_pos, unsigned int occ)
 		    invert = m->tagset[m->seltags] & 1 << i ? 0 : 1;
 
         if (urg) {
-            XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeSel][ColBg].pixel :
+            XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeTabActiveGroup][ColBg].pixel :
                                 scheme[SchemeNorm][ColFg].pixel);
          } else {
             /* Select active color for current square */
-            XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeSel][ColBg].pixel :
+            XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeTabActiveGroup][ColBg].pixel :
                                 scheme[SchemeNorm][ColFg].pixel);
          }
 
@@ -1243,7 +1243,7 @@ void drawtaggrid(Monitor *m, int *x_pos, unsigned int occ)
 
             /* Mark square if tag has client */
             if (occ & 1 << i) {
-                XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeSel][ColFg].pixel :
+                XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeSel][ColBg].pixel :
                                 scheme[SchemeNorm][ColBg].pixel);
                 XFillRectangle(dpy, drw->drawable, drw->gc, x + 1, y + 1,
                                h / 2, h / 2);

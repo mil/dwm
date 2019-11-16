@@ -37,14 +37,14 @@ static const char col_mgray[] = "#cfcfcf";
 static const char col_lblue[] = "#f7faff";
 static const char *colors[][5]      = {
 	/*               fg         bg         border   */
-	[SchemeNorm] = { col_gray3, col_gray1, col_lgray },
+	[SchemeNorm] = { col_dgray, col_lgray, col_lgray },
 	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan},
 
   [SchemeTabInactive] = { col_black, col_mgray, col_black},
   [SchemeTabActiveGroup] = { col_dgray, col_lgray, col_black}
 };
 static const int focusonwheel       = 0;
-static const unsigned int gappx     = 5;        /* gap pixel between windows */
+static const unsigned int gappx     = 2;        /* gap pixel between windows */
  
 
 /* tagging */
