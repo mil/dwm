@@ -58,20 +58,20 @@ static const Rule rules[] = {
 	/* class      instance    title       tags mask     isfloating   isterminal nowallow monitor */
 	{ "st",       NULL,       NULL,       0,            0,           1,         1,        -1 },
 
-	{ "st",       NULL, "mutt",     1 << 4,            0,           0,         0,        -1 },
-	{ "st",       NULL, "newsboat", 1 << 4,            0,           0,         0,        -1 },
+	//{ "st",       NULL, "mutt",     1 << 4,            0,           0,         0,        -1 },
+	//{ "st",       NULL, "newsboat", 1 << 4,            0,           0,         0,        -1 },
 
-	{ "surf",       NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
-	{ "Surf",       NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
-	{ "Firefox",    NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
-	{ "firefox",    NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
+	//{ "surf",       NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
+	//{ "Surf",       NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
+	//{ "Firefox",    NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
+	//{ "firefox",    NULL,      NULL,       1 << 1,      0,           0,         0,        -1 },
 
-	{ "DBeaver",       NULL,      NULL,       1 << 2,      0,           0,         0,        -1 },
-	{ NULL,       NULL,      "DBeaver",       1 << 2,      0,           0,         0,        -1 },
+	//{ "DBeaver",       NULL,      NULL,       1 << 2,      0,           0,         0,        -1 },
+	//{ NULL,       NULL,      "DBeaver",       1 << 2,      0,           0,         0,        -1 },
 
-	{ "mpv",       NULL,      NULL,       1 << 5,      0,           0,         0,        -1 },
-	{ NULL,       NULL,      "pianobar",       1 << 5,      0,           0,         0,        -1 },
-	{ NULL,       NULL,       "mpv",     1 << 5,    0,           0,         0,        -1 },
+	//{ "mpv",       NULL,      NULL,       1 << 5,      0,           0,         0,        -1 },
+	//{ NULL,       NULL,      "pianobar",       1 << 5,      0,           0,         0,        -1 },
+	//{ NULL,       NULL,       "mpv",     1 << 5,    0,           0,         0,        -1 },
 
 };
 
