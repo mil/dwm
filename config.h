@@ -150,8 +150,11 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_o,      setcfact,       {.f =  0.00} },
 
 
-	{ MODKEY,                       XK_Tab,    shiftview,      {.i = 1} },
-	{ MODKEY|ShiftMask,             XK_Tab,    shiftview,      {.i = -1} },
+//	{ MODKEY,                       XK_Tab,    shiftview,      {.i = 1} },
+//	{ MODKEY|ShiftMask,             XK_Tab,    shiftview,      {.i = -1} },
+	{ MODKEY,                       XK_Tab,      inplacerotate,  {.i = +1} },
+	{ MODKEY|ShiftMask,             XK_Tab,      inplacerotate,  {.i = -1} },
+
 
 	{ MODKEY|ShiftMask,             XK_grave,  killclient,     {0} },
 
