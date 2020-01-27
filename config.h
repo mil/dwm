@@ -40,8 +40,8 @@ static const char *colors[][5]      = {
 	[SchemeNorm] = { col_dgray, col_lgray, col_lgray },
 	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan},
 
-  //[SchemeTabInactive] = { col_black, col_mgray, col_black},
-  //[SchemeTabActiveGroup] = { col_dgray, col_lgray, col_black}
+  [SchemeTabInactive] = { col_black, col_mgray, col_black},
+  [SchemeTabActive] = { col_dgray, col_lgray, col_black}
 };
 static const int focusonwheel       = 0;
 static const unsigned int gappx     = 2;        /* gap pixel between windows */
@@ -93,6 +93,16 @@ static const Layout layouts[] = {
 	{ "B",  deckdouble },
 	{ "C",  col }
 };
+
+/* Bartabgroups properties */
+#define BARTAB_BORDERS 1       // 0 = off, 1 = on
+#define BARTAB_BOTTOMBORDER 1  // 0 = off, 1 = on
+#define BARTAB_TAGSINDICATOR 1 // 0 = off, 1 = on if >1 client/view tag, 2 = always on
+#define BARTAB_TAGSPX 5        // # pixels for tag grid boxes
+#define BARTAB_TAGSROWS 2      // # rows in tag grid (9 tags, e.g. 3x3)
+static void (*bartabmonfns[])(Monitor *) = { monocle /* , customlayoutfn */ };
+static void (*bartabfloatfns[])(Monitor *) = { NULL /* , customlayoutfn */ };
+
 
 #define LTILE 0
 #define LFLOAT 1
