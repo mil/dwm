@@ -44,7 +44,7 @@ static const char *colors[][5]      = {
   [SchemeTabActive] = { col_dgray, col_lgray, col_black}
 };
 static const int focusonwheel       = 0;
-static const unsigned int gappx     = 2;        /* gap pixel between windows */
+static const unsigned int gappx     = 5;        /* gap pixel between windows */
  
 
 /* tagging */
@@ -146,6 +146,8 @@ static Key keys[] = {
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
+
+	{ MODKEY,                       XK_c,      togglegaps,     {0} },
 
 	{ MODKEY|ShiftMask,             XK_j,      pushdown,    {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_k,      pushup,    {.i = -1 } },
