@@ -154,6 +154,7 @@ static Key keys[] = {
 
 	//{ MODKEY,                       XK_space,  zoom,         {0} },
 	{ MODKEY,                       XK_space,  transfer,         {0} },
+	{ MODKEY|ShiftMask,             XK_space,  transferall,      {0} },
 	{ MODKEY,                       XK_semicolon, switchcol,    {0} },
 
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
