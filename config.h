@@ -154,7 +154,7 @@ static Key keys[] = {
 
 	{ MODKEY,                       XK_g,      mastertagcycle,    {.i = -1 } },
 
-	//{ MODKEY,                       XK_space,  zoom,         {0} },
+	{ MODKEY,                       XK_s,  zoom,         {0} },
 	{ MODKEY,                       XK_space,  transfer,         {0} },
 	{ MODKEY|ShiftMask,             XK_space,  transferall,      {0} },
 	{ MODKEY,                       XK_semicolon, switchcol,    {0} },
