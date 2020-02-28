@@ -44,7 +44,7 @@ static const char *colors[][5]      = {
   [SchemeTabActive] = { col_dgray, col_lgray, col_black}
 };
 static const int focusonwheel       = 0;
-static const unsigned int gappx     = 5;        /* gap pixel between windows */
+static const unsigned int gappx     = 0;        /* gap pixel between windows */
  
 
 /* tagging */
